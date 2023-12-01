@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework;
 using ScapeCore.Core.Batching;
 using ScapeCore.Core.Engine.Components;
 using Baksteen.Extensions.DeepCopy;
+using ScapeCore.Core.Batching.Events;
 
 namespace ScapeCore.Core.Engine
 {

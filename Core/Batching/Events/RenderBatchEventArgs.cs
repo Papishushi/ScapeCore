@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
 
-namespace ScapeCore.Core.Batching
+namespace ScapeCore.Core.Batching.Events
 {
     internal delegate void RenderBatchEventHandler(object source, RenderBatchEventArgs args);
     internal class RenderBatchEventArgs : EventArgs

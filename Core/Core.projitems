@@ -9,13 +9,18 @@
     <Import_RootNamespace>Core</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)Batching\LoadBatchEventArgs.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Batching\ReflectiveEnumerator.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Batching\RenderBatchEventArgs.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Batching\ResourceLoadAttribute.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Batching\ResourceManager.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Batching\StartBatchEventArgs.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Batching\UpdateBatchEventArgs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Batching\Resources\ResourceDependencyTree.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Batching\Resources\ResourceInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Batching\Resources\ResourceWrapper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Batching\Tools\IRuntimeValue.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Batching\Events\LoadBatchEventArgs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Batching\Tools\ReflectiveEnumerator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Batching\Events\RenderBatchEventArgs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Batching\Resources\ResourceLoadAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Batching\Resources\ResourceManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Batching\Tools\RuntimeValue.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Batching\Events\StartBatchEventArgs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Batching\Events\UpdateBatchEventArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Engine\Behaviour.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Engine\Component.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Engine\Components\RectTransform.cs" />
@@ -29,6 +34,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)LLAM.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)Batching\Events\" />
+    <Folder Include="$(MSBuildThisFileDirectory)Batching\Resources\" />
+    <Folder Include="$(MSBuildThisFileDirectory)Batching\Tools\" />
     <Folder Include="$(MSBuildThisFileDirectory)Content\" />
   </ItemGroup>
   <ItemGroup>

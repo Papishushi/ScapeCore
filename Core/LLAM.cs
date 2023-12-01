@@ -2,11 +2,10 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Reflection.Metadata;
-using ScapeCore.Core.Batching;
 using System;
 using ScapeCore.Core.Engine;
+using ScapeCore.Core.Batching.Events;
+using System.Net.NetworkInformation;
 
 namespace ScapeCore.Targets
 {
@@ -28,20 +27,16 @@ namespace ScapeCore.Targets
         internal event StartBatchEventHandler OnStart;
         internal event LoadBatchEventHandler OnLoad;
         internal event RenderBatchEventHandler OnRender;
-        //public readonly List<UpdateBatchEventHandler> UpdateBatches = new();
-        //public readonly Queue<StartBatchEventHandler> StartBatches = new();
-        //public readonly Queue<LoadBatchEventHandler> LoadBatches = new();
-        //public readonly List<RenderBatchEventHandler> RenderBatches = new();
-
 
         public LLAM()
         {
+            if (Instance != null) throw new InvalidOperationException("LLAM singleton instance is not null");
+            else Instance = this;
+
             Console.WriteLine("Constructing LLAM...");
 
-            Instance = this;
-
             //Very much important indeed
-            ResourceManager.Ping();
+            Core.Batching.Resources.ResourceManager.Ping();
 
             _graphics = new(this);
             Content.RootDirectory = "Content";

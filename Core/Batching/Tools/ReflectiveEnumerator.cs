@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace ScapeCore.Core.Batching
+namespace ScapeCore.Core.Batching.Tools
 {
     public static class ReflectiveEnumerator
     {
