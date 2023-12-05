@@ -1,6 +1,4 @@
 ﻿using System;
-using ProtoBuf;
-using ScapeCore.Core.Serialization;
 using ScapeCore.Targets;
 
 namespace ScapeCore.Core.Engine
@@ -35,5 +33,6 @@ namespace ScapeCore.Core.Engine
 
         protected abstract void OnCreate();
         protected abstract void OnDestroy();
+
     }
 }
