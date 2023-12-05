@@ -21,6 +21,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Batching\Tools\RuntimeValue.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batching\Events\StartBatchEventArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batching\Events\UpdateBatchEventArgs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Collections\Merkle\MerkleNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Collections\Merkle\MerkleTree.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Engine\Behaviour.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Engine\Component.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Engine\Components\RectTransform.cs" />
@@ -32,11 +34,13 @@
     <Compile Include="$(MSBuildThisFileDirectory)Engine\Tilemaps\TileBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Engine\Tilemaps\TileRenderer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)LLAM.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\SerializationManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)Batching\Events\" />
     <Folder Include="$(MSBuildThisFileDirectory)Batching\Resources\" />
     <Folder Include="$(MSBuildThisFileDirectory)Batching\Tools\" />
+    <Folder Include="$(MSBuildThisFileDirectory)Collections\Merkle\" />
     <Folder Include="$(MSBuildThisFileDirectory)Content\" />
   </ItemGroup>
   <ItemGroup>

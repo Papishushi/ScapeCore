@@ -6,6 +6,13 @@ using System;
 using ScapeCore.Core.Engine;
 using ScapeCore.Core.Batching.Events;
 using System.Net.NetworkInformation;
+using Serilog;
+using Serilog.Sinks.SystemConsole.Themes;
+using ScapeCore.Core.Collections.Merkle;
+using System.Linq;
+using ScapeCore.Core.Serialization;
+using Baksteen.Extensions.DeepCopy;
+using ProtoBuf;
 
 namespace ScapeCore.Targets
 {
@@ -30,10 +37,12 @@ namespace ScapeCore.Targets
 
         public LLAM()
         {
+            Log.Logger = new LoggerConfiguration().MinimumLevel.Debug().WriteTo.Async(wt => wt.Console(theme: AnsiConsoleTheme.Code)).CreateLogger();
+            
             if (Instance != null) throw new InvalidOperationException("LLAM singleton instance is not null");
             else Instance = this;
 
-            Console.WriteLine("Constructing LLAM...");
+            Log.Debug("Constructing LLAM...");
 
             //Very much important indeed
             Core.Batching.Resources.ResourceManager.Ping();
@@ -46,15 +55,19 @@ namespace ScapeCore.Targets
 
         protected override void Initialize()
         {
-            Console.WriteLine("Initializing...");
+            Log.Information("Initializing...");
+            static void successLoad(object a, StartBatchEventArgs b) => Log.Information("Load Sucess!");
+            OnStart += successLoad;
+
             // TODO: Add your initialization logic here
-            new Ball();
+
+
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
-            Console.WriteLine("Loading Content...");
+            Log.Information("Loading Content...");
             _spriteBatch = new(GraphicsDevice);
             var args = new LoadBatchEventArgs($"Load process | Patch size {OnLoad?.GetInvocationList().Length}");
             OnLoad?.Invoke(this, args);
@@ -86,6 +99,13 @@ namespace ScapeCore.Targets
             _spriteBatch.End();
 
             base.Draw(gameTime);
+        }
+
+        protected override void EndRun()
+        {
+            // At application shutdown (results in monitors getting StopMonitoring calls)
+            Log.CloseAndFlush();
+            base.EndRun();
         }
     }
 }

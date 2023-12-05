@@ -4,6 +4,8 @@ using ScapeCore.Core.Batching.Events;
 using ScapeCore.Core.Batching.Tools;
 using ScapeCore.Core.Engine;
 using ScapeCore.Targets;
+using Serilog;
+using Serilog.Core;
 using System;
 using System.Collections;
 using System.Collections.ObjectModel;
@@ -26,7 +28,7 @@ namespace ScapeCore.Core.Batching.Resources
 
         private static void LoadAllReferencedResources(object source, LoadBatchEventArgs args)
         {
-            Console.WriteLine($"{source.GetHashCode()} {args.GetInfo()}");
+            Log.Debug($"{source.GetHashCode()} {args.GetInfo()}");
 
             foreach (var type in ReflectiveEnumerator.GetEnumerableOfType<MonoBehaviour>())
             {
@@ -52,7 +54,7 @@ namespace ScapeCore.Core.Batching.Resources
             }
 
             foreach (var dependency in _tree.Dependencies)
-                Console.WriteLine(($"{string.Join(',', dependency.Value.dependencies)} types loaded resource {{{dependency.Key.ResourceName}}} of type {{{dependency.Key.TargetType}}}"));
+                Log.Debug(($"{string.Join(',', dependency.Value.dependencies)} types loaded resource {{{dependency.Key.ResourceName}}} of type {{{dependency.Key.TargetType}}}"));
         }
     }
 }

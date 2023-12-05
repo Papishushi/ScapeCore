@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using ScapeCore.Core.Batching;
 using ScapeCore.Core.Batching.Events;
 using ScapeCore.Core.Batching.Resources;
+using Serilog;
 using System;
 using System.Drawing;
 using System.Text;
@@ -22,19 +23,14 @@ namespace ScapeCore.Core.Engine.Components
         protected Renderer(StringBuilder name) : base(name.ToString()) => texture = null;
 
 
-        protected override void OnCreate() => game.OnRender += RenderWrapper;
-        protected override void OnDestroy() => game.OnRender -= RenderWrapper;
-
-        protected override string Serialize()
-        {
-            throw new System.NotImplementedException();
-        }
+        protected override void OnCreate() => Game.OnRender += RenderWrapper;
+        protected override void OnDestroy() => Game.OnRender -= RenderWrapper;
 
         protected abstract void Render();
         private void RenderWrapper(object source, RenderBatchEventArgs args)
         {
             _time = args.GetTime();
-            Console.WriteLine($"{source.GetHashCode()} {args.GetInfo()}");
+            Log.Verbose("{{{@source}}} {@args}", source.GetHashCode(), args.GetInfo());
             Render();
         }
     }

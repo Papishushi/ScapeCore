@@ -42,7 +42,7 @@ namespace ScapeCore.Core.Engine.Components
             this.depth=depth;
         }
 
-        protected override void Render() => game.SpriteBatch.Draw(texture,
+        protected override void Render() => Game.SpriteBatch.Draw(texture,
                                                                 gameObject?.transform.position ?? Vector2.Zero,
                                                                 rtransform?.rectangle ?? new Rectangle(Point.Zero, new(100,100)),
                                                                 Color.White,

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using ProtoBuf;
 using ScapeCore;
 using ScapeCore.Core.Engine.Components;
+using Serilog;
 
 namespace ScapeCore.Core.Engine
 {
@@ -68,7 +70,7 @@ namespace ScapeCore.Core.Engine
             }
             catch (NullReferenceException nRE)
             {
-                Console.WriteLine($"Failed to get behaviour on GameObject {name} {{{Id}}}\t{nRE.Message}");
+                Log.Error($"Failed to get behaviour on GameObject {name} {{{Id}}}\t{nRE.Message}");
                 throw;
             }
             foreach (Behaviour behaviour in behaviours)
@@ -84,7 +86,7 @@ namespace ScapeCore.Core.Engine
             }
             catch (NullReferenceException nRE)
             {
-                Console.WriteLine($"Failed to add behaviour on GameObject {name} {{{Id}}}\t{nRE.Message}");
+                Log.Error($"Failed to add behaviour on GameObject {name} {{{Id}}}\t{nRE.Message}");
                 throw;
             }
             var temp = new T();
@@ -103,7 +105,7 @@ namespace ScapeCore.Core.Engine
             }
             catch (NullReferenceException nRE)
             {
-                Console.WriteLine($"Failed to add behaviour on GameObject {name} {{{Id}}}\t{nRE.Message}");
+                Log.Error($"Failed to add behaviour on GameObject {name} {{{Id}}}\t{nRE.Message}");
                 throw;
             }
             if (behaviour == null) return null;
@@ -122,7 +124,7 @@ namespace ScapeCore.Core.Engine
             }
             catch (NullReferenceException nRE)
             {
-                Console.WriteLine($"Failed to remove behaviour on GameObject {name} {{{Id}}}\t{nRE.Message}");
+                Log.Error($"Failed to remove behaviour on GameObject {name} {{{Id}}}\t{nRE.Message}");
                 throw;
             }
             T temp = behaviours.Find(x =>  x.GetType() == typeof(T)).To<T>();
@@ -143,7 +145,7 @@ namespace ScapeCore.Core.Engine
             }
             catch (NullReferenceException nRE)
             {
-                Console.WriteLine($"Failed to remove behaviour on GameObject {name} {{{Id}}}\t{nRE.Message}");
+                Log.Error($"Failed to remove behaviour on GameObject {name} {{{Id}}}\t{nRE.Message}");
                 throw;
             }
             if (behaviour == null) return null;
@@ -155,13 +157,9 @@ namespace ScapeCore.Core.Engine
             return behaviour;
         }
 
-        protected override void OnCreate() => game.GameObjects.Add(this);
+        protected override void OnCreate() => Game.GameObjects.Add(this);
 
-        protected override void OnDestroy() => game.GameObjects.Remove(this);
+        protected override void OnDestroy() => Game.GameObjects.Remove(this);
 
-        protected override string Serialize()
-        {
-            throw new System.NotImplementedException();
-        }
     }
 }

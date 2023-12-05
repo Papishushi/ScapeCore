@@ -42,7 +42,7 @@ namespace ScapeCore.Core.Engine.Tilemaps
             this.depth=depth;
         }
 
-        protected override void Render() => game.SpriteBatch.Draw(texture,
+        protected override void Render() => Game.SpriteBatch.Draw(texture,
                                                                 gameObject.transform.position,
                                                                 rtransform.rectangle,
                                                                 Color.White,

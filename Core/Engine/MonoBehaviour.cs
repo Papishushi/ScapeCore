@@ -6,6 +6,9 @@ using ScapeCore.Core.Batching;
 using ScapeCore.Core.Engine.Components;
 using Baksteen.Extensions.DeepCopy;
 using ScapeCore.Core.Batching.Events;
+using Serilog;
+using ProtoBuf;
+using ProtoBuf.Meta;
 
 namespace ScapeCore.Core.Engine
 {
@@ -34,16 +37,16 @@ namespace ScapeCore.Core.Engine
 
         protected override void OnCreate()
         {
-            game.MonoBehaviours.Add(this);
-            game.OnStart += StartWrapper;
-            game.OnUpdate += UpdateWrapper;
+            Game.MonoBehaviours.Add(this);
+            Game.OnStart += StartWrapper;
+            Game.OnUpdate += UpdateWrapper;
         }
 
         protected override void OnDestroy()
         {
-            game.MonoBehaviours.Remove(this);
-            game.OnUpdate -= UpdateWrapper;
-            game.OnStart -= StartWrapper;
+            Game.MonoBehaviours.Remove(this);
+            Game.OnUpdate -= UpdateWrapper;
+            Game.OnStart -= StartWrapper;
         }
 
         protected abstract void Start();
@@ -52,7 +55,7 @@ namespace ScapeCore.Core.Engine
         private void StartWrapper(object source, StartBatchEventArgs args)
         {
             if (!isActive) return;
-            Console.WriteLine($"{source.GetHashCode()} {args.GetInfo()}");
+            Log.Verbose("{{{@source}}} {@args}", source.GetHashCode(), args.GetInfo());
             if (_started) return;
             Start();
             _started = true;
@@ -61,15 +64,8 @@ namespace ScapeCore.Core.Engine
         {
             if (!isActive) return;
             _time = args.GetTime();
-            Console.WriteLine($"{source.GetHashCode()} {args.GetInfo()}");
+            Log.Verbose("{{{@source}}} {@args}", source.GetHashCode(), args.GetInfo());
             Update();
         }
-
-        protected override string Serialize()
-        {
-            throw new System.NotImplementedException();
-        }
-
-
     }
 }

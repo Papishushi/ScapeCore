@@ -30,10 +30,5 @@ namespace ScapeCore.Core.Engine.Components
         {
 
         }
-
-        protected override string Serialize()
-        {
-            throw new System.NotImplementedException();
-        }
     }
 }
