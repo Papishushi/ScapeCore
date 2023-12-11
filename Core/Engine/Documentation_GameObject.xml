@@ -1,0 +1,153 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+	<assembly>
+		<name>Your.Assembly.Name</name>
+	</assembly>
+	<members>
+		<!-- GameObject Class -->
+		<member name="T:ScapeCore.Core.Engine.GameObject">
+			<summary>Represents a game object in the ScapeCore engine that can have associated behaviours and a transform.</summary>
+			<remarks>
+				This class extends the functionality of the <see cref="ScapeCore.Core.Engine.Behaviour"/> class to include behaviours, a transform, and a tag.
+			</remarks>
+		</member>
+
+		<!-- Properties -->
+		<member name="P:ScapeCore.Core.Engine.GameObject.transform">
+			<summary>
+				Gets or sets the <see cref="ScapeCore.Core.Engine.Transform"/> associated with the <see cref="ScapeCore.Core.Engine.GameObject"/>.
+			</summary>
+			<remarks>
+				This property provides access to the transform of the game object.
+			</remarks>
+		</member>
+		<member name="P:ScapeCore.Core.Engine.GameObject.tag">
+			<summary>
+				Gets or sets the tag associated with the <see cref="ScapeCore.Core.Engine.GameObject"/>.
+			</summary>
+			<remarks>
+				The tag is a user-defined identifier for the game object.
+			</remarks>
+		</member>
+		<member name="P:ScapeCore.Core.Engine.GameObject.TagList">
+			<summary>Gets a read-only collection of all available tags for game objects.</summary>
+			<remarks>
+				This collection is updated dynamically as game objects are created or destroyed.
+			</remarks>
+		</member>
+
+		<!-- Constructors -->
+		<member name="M:ScapeCore.Core.Engine.GameObject.#ctor">
+			<summary>
+				Default constructor for the <see cref="ScapeCore.Core.Engine.GameObject"/> class.
+			</summary>
+			<remarks>
+				Initializes the game object with the default name and creates a default transform.
+			</remarks>
+		</member>
+		<member name="M:ScapeCore.Core.Engine.GameObject.#ctor(System.String)">
+			<summary>
+				Constructor for the <see cref="ScapeCore.Core.Engine.GameObject"/> class with a specified name.
+			</summary>
+			<param name="name">
+				The name of the <see cref="ScapeCore.Core.Engine.GameObject"/>.
+			</param>
+			<remarks>
+				Initializes the game object with the specified name and creates a default transform.
+			</remarks>
+		</member>
+		<member name="M:ScapeCore.Core.Engine.GameObject.#ctor(ScapeCore.Core.Engine.Behaviour[])">
+			<summary>
+				Constructor for the <see cref="ScapeCore.Core.Engine.GameObject"/> class with specified behaviours.
+			</summary>
+			<param name="behaviours">Behaviours to be associated with the game object.</param>
+			<remarks>
+				Initializes the game object with the default name, creates a default transform, and associates the specified behaviours.
+			</remarks>
+		</member>
+		<member name="M:ScapeCore.Core.Engine.GameObject.#ctor(System.String,ScapeCore.Core.Engine.Behaviour[])">
+			<summary>
+				Constructor for the <see cref="ScapeCore.Core.Engine.GameObject"/> class with a specified name and behaviours.
+			</summary>
+			<param name="name">
+				The name of the <see cref="ScapeCore.Core.Engine.GameObject"/>.
+			</param>
+			<param name="behaviours">Behaviours to be associated with the game object.</param>
+			<remarks>
+				Initializes the game object with the specified name, creates a default transform, and associates the specified behaviours.
+			</remarks>
+		</member>
+
+		<!-- Methods -->
+		<member name="M:ScapeCore.Core.Engine.GameObject.BehavioursNullException">
+			<summary>
+				Throws a <see cref="System.NullReferenceException"/> if the behaviours list is null.
+			</summary>
+			<remarks>
+				This method is used internally to check for null before performing operations on the behaviours list.
+			</remarks>
+			<exception cref="System.NullReferenceException">Thrown if the behaviours list is null.</exception>
+		</member>
+		<member name="M:ScapeCore.Core.Engine.GameObject.GetBehaviour``1">
+			<summary>Gets the specified type of behaviour associated with the game object.</summary>
+			<typeparam name="T">The type of behaviour to retrieve.</typeparam>
+			<returns>The behaviour of the specified type if found; otherwise, null.</returns>
+			<remarks>
+				This method searches for a behaviour of the specified type within the game object's behaviours list.
+			</remarks>
+			<exception cref="System.NullReferenceException">Thrown if the behaviours list is null.</exception>
+		</member>
+		<member name="M:ScapeCore.Core.Engine.GameObject.AddBehaviour``1">
+			<summary>Adds a new instance of the specified type of behaviour to the game object.</summary>
+			<typeparam name="T">The type of behaviour to add.</typeparam>
+			<returns>The newly added behaviour instance.</returns>
+			<remarks>
+				This method creates a new instance of the specified behaviour type, adds it to the behaviours list, and associates it with the game object.
+			</remarks>
+			<exception cref="System.NullReferenceException">Thrown if the behaviours list is null.</exception>
+		</member>
+		<member name="M:ScapeCore.Core.Engine.GameObject.AddBehaviour``1(``0)">
+			<summary>Adds the specified instance of a behaviour to the game object.</summary>
+			<typeparam name="T">The type of behaviour.</typeparam>
+			<param name="behaviour">The instance of the behaviour to add.</param>
+			<returns>The specified behaviour instance.</returns>
+			<remarks>
+				This method adds the specified behaviour instance to the behaviours list and associates it with the game object.
+			</remarks>
+			<exception cref="System.NullReferenceException">Thrown if the behaviours list is null.</exception>
+		</member>
+		<member name="M:ScapeCore.Core.Engine.GameObject.RemoveBehaviour``1">
+			<summary>Removes and returns the behaviour of the specified type from the game object.</summary>
+			<typeparam name="T">The type of behaviour to remove.</typeparam>
+			<returns>The removed behaviour instance if found; otherwise, null.</returns>
+			<remarks>
+				This method searches for a behaviour of the specified type within the game object's behaviours list, removes it, and disassociates it from the game object.
+			</remarks>
+			<exception cref="System.NullReferenceException">Thrown if the behaviours list is null.</exception>
+		</member>
+		<member name="M:ScapeCore.Core.Engine.GameObject.RemoveBehaviour``1(``0)">
+			<summary>Removes the specified instance of a behaviour from the game object.</summary>
+			<typeparam name="T">The type of behaviour.</typeparam>
+			<param name="behaviour">The instance of the behaviour to remove.</param>
+			<returns>The specified behaviour instance if found; otherwise, null.</returns>
+			<remarks>
+				This method removes the specified behaviour instance from the behaviours list and disassociates it from the game object.
+			</remarks>
+			<exception cref="System.NullReferenceException">Thrown if the behaviours list is null.</exception>
+		</member>
+
+		<!-- Overrides -->
+		<member name="M:ScapeCore.Core.Engine.GameObject.OnCreate">
+			<summary>Executes when the game object is created.</summary>
+			<remarks>
+				This method adds the game object to the global game objects list.
+			</remarks>
+		</member>
+		<member name="M:ScapeCore.Core.Engine.GameObject.OnDestroy">
+			<summary>Executes when the game object is destroyed.</summary>
+			<remarks>
+				This method removes the game object from the global game objects list.
+			</remarks>
+		</member>
+	</members>
+</doc>

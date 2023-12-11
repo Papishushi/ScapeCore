@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+	<assembly>
+		<name>Your.Assembly.Name</name>
+	</assembly>
+	<members>
+		<!-- RectTransform Class -->
+		<member name="T:ScapeCore.Core.Engine.Components.RectTransform">
+			<summary>Represents a class for defining the transformation of a rectangle in the ScapeCore engine.</summary>
+			<remarks>
+				This class is derived from the Component class and is used to define the position, rotation, and scale of a rectangle.
+			</remarks>
+		</member>
+
+		<!-- Properties -->
+		<member name="P:ScapeCore.Core.Engine.Components.RectTransform.rectangle">
+			<summary>
+				Gets or sets the <see cref="Microsoft.Xna.Framework.Rectangle"/> defining the position and size of the rectangle.
+			</summary>
+			<remarks>
+				The Rectangle property represents the position (X, Y) and size (Width, Height) of the rectangle.
+			</remarks>
+		</member>
+		<member name="P:ScapeCore.Core.Engine.Components.RectTransform.rotation">
+			<summary>Gets or sets the rotation angles (in radians) for the X and Y axes of the rectangle.</summary>
+			<remarks>
+				The Rotation property represents the rotation angles for the X and Y axes of the rectangle.
+			</remarks>
+		</member>
+		<member name="P:ScapeCore.Core.Engine.Components.RectTransform.scale">
+			<summary>Gets or sets the scaling factors for the X and Y axes of the rectangle.</summary>
+			<remarks>
+				The Scale property represents the scaling factors for the X and Y axes of the rectangle.
+			</remarks>
+		</member>
+
+		<!-- Constructors -->
+		<member name="M:ScapeCore.Core.Engine.Components.RectTransform.#ctor">
+			<summary>
+				Default constructor for the <see cref="ScapeCore.Core.Engine.Components.RectTransform"/> class.
+			</summary>
+			<remarks>
+				Initializes a new instance of the RectTransform class with default values (position at (0,0), no rotation, and uniform scale).
+			</remarks>
+		</member>
+		<member name="M:ScapeCore.Core.Engine.Components.RectTransform.#ctor(Microsoft.Xna.Framework.Rectangle,System.Numerics.Vector2,System.Numerics.Vector2)">
+			<summary>
+				Constructor for the <see cref="ScapeCore.Core.Engine.Components.RectTransform"/> class with specified rectangle, rotation, and scale.
+			</summary>
+			<param name="rectangle">The rectangle defining the position and size.</param>
+			<param name="rotation">The rotation angles for the X and Y axes.</param>
+			<param name="scale">The scaling factors for the X and Y axes.</param>
+			<remarks>
+				Initializes a new instance of the RectTransform class with the specified rectangle, rotation, and scale.
+			</remarks>
+		</member>
+
+		<!-- Methods -->
+		<member name="M:ScapeCore.Core.Engine.Components.RectTransform.OnCreate">
+			<summary>Overrides the OnCreate method to handle actions when the RectTransform is created.</summary>
+			<remarks>
+				This method is called when the RectTransform is created. Override this method to perform actions upon creation.
+			</remarks>
+		</member>
+		<member name="M:ScapeCore.Core.Engine.Components.RectTransform.OnDestroy">
+			<summary>Overrides the OnDestroy method to handle actions when the RectTransform is destroyed.</summary>
+			<remarks>
+				This method is called when the RectTransform is destroyed. Override this method to perform actions upon destruction.
+			</remarks>
+		</member>
+	</members>
+</doc>

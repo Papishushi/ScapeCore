@@ -1,0 +1,96 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+	<assembly>
+		<name>Your.Assembly.Name</name>
+	</assembly>
+	<members>
+		<!-- Behaviour Class -->
+		<member name="T:ScapeCore.Core.Engine.Behaviour">
+			<summary>Represents a base class for components in the ScapeCore engine.</summary>
+			<remarks>
+				This class provides common functionality for components, such as a unique identifier, reference to the game instance, and methods for creation and destruction.
+			</remarks>
+		</member>
+
+		<!-- Fields -->
+		<member name="F:ScapeCore.Core.Engine.Behaviour._id">
+			<summary>
+				The unique identifier for the <see cref="ScapeCore.Core.Engine.Behaviour"/>.
+			</summary>
+		</member>
+		<member name="F:ScapeCore.Core.Engine.Behaviour.Game">
+			<summary>
+				The instance of the <see cref="ScapeCore.Targets.LLAM"/> game engine.
+			</summary>
+		</member>
+		<member name="F:ScapeCore.Core.Engine.Behaviour.name">
+			<summary>
+				The name of the <see cref="ScapeCore.Core.Engine.Behaviour"/>.
+			</summary>
+		</member>
+		<member name="F:ScapeCore.Core.Engine.Behaviour.isActive">
+			<summary>
+				Flag indicating whether the <see cref="ScapeCore.Core.Engine.Behaviour"/> is active.
+			</summary>
+		</member>
+
+		<!-- Properties -->
+		<member name="P:ScapeCore.Core.Engine.Behaviour.Id">
+			<summary>
+				Gets the unique identifier for the <see cref="ScapeCore.Core.Engine.Behaviour"/>.
+			</summary>
+		</member>
+
+		<!-- Constructors -->
+		<member name="M:ScapeCore.Core.Engine.Behaviour.#ctor">
+			<summary>
+				Default constructor for the <see cref="ScapeCore.Core.Engine.Behaviour"/> class.
+			</summary>
+			<remarks>
+				Initializes the <see cref="ScapeCore.Targets.LLAM"/> instance, sets the default name, and activates the component.
+			</remarks>
+		</member>
+		<member name="M:ScapeCore.Core.Engine.Behaviour.#ctor(System.String)">
+			<summary>
+				Constructor for the <see cref="ScapeCore.Core.Engine.Behaviour"/> class with a specified name.
+			</summary>
+			<param name="name">
+				The name of the <see cref="ScapeCore.Core.Engine.Behaviour"/>.
+			</param>
+			<remarks>
+				Initializes the <see cref="ScapeCore.Targets.LLAM"/> instance, sets the specified name, and activates the component.
+			</remarks>
+		</member>
+
+		<!-- Methods -->
+		<member name="M:ScapeCore.Core.Engine.Behaviour.To``1">
+			<summary>
+				Converts the <see cref="ScapeCore.Core.Engine.Behaviour"/> to a specified type.
+			</summary>
+			<typeparam name="T">
+				The type to convert to, must be a subclass of <see cref="ScapeCore.Core.Engine.Behaviour"/>.
+			</typeparam>
+			<returns>The converted instance of the specified type.</returns>
+		</member>
+		<member name="M:ScapeCore.Core.Engine.Behaviour.ToString">
+			<summary>
+				Returns a string representation of the <see cref="ScapeCore.Core.Engine.Behaviour"/>.
+			</summary>
+			<returns>
+				The name of the <see cref="ScapeCore.Core.Engine.Behaviour"/>.
+			</returns>
+		</member>
+		<member name="M:ScapeCore.Core.Engine.Behaviour.OnCreate">
+			<summary>Called when the component is created.</summary>
+			<remarks>
+				Initializes the component and performs setup logic.
+			</remarks>
+		</member>
+		<member name="M:ScapeCore.Core.Engine.Behaviour.OnDestroy">
+			<summary>Called when the component is destroyed.</summary>
+			<remarks>
+				Cleans up resources and performs teardown logic.
+			</remarks>
+		</member>
+	</members>
+</doc>

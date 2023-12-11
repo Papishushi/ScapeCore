@@ -1,0 +1,76 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+	<assembly>
+		<name>Your.Assembly.Name</name>
+	</assembly>
+	<members>
+		<!-- Transform Class -->
+		<member name="T:ScapeCore.Core.Engine.Components.Transform">
+			<summary>Represents a transformation component for a game object in the ScapeCore engine.</summary>
+			<remarks>
+				This class extends the functionality of the <see cref="ScapeCore.Core.Engine.Component"/> class to include position, rotation, and scale vectors.
+			</remarks>
+		</member>
+
+		<!-- Properties -->
+		<member name="P:ScapeCore.Core.Engine.Components.Transform.position">
+			<summary>
+				Gets or sets the position vector of the <see cref="ScapeCore.Core.Engine.Components.Transform"/>.
+			</summary>
+			<remarks>
+				The position vector represents the location of the game object in 2D space.
+			</remarks>
+		</member>
+		<member name="P:ScapeCore.Core.Engine.Components.Transform.rotation">
+			<summary>
+				Gets or sets the rotation vector of the <see cref="ScapeCore.Core.Engine.Components.Transform"/>.
+			</summary>
+			<remarks>
+				The rotation vector represents the orientation of the game object in 2D space.
+			</remarks>
+		</member>
+		<member name="P:ScapeCore.Core.Engine.Components.Transform.scale">
+			<summary>
+				Gets or sets the scale vector of the <see cref="ScapeCore.Core.Engine.Components.Transform"/>.
+			</summary>
+			<remarks>
+				The scale vector represents the size of the game object in 2D space.
+			</remarks>
+		</member>
+
+		<!-- Constructors -->
+		<member name="M:ScapeCore.Core.Engine.Components.Transform.#ctor">
+			<summary>
+				Default constructor for the <see cref="ScapeCore.Core.Engine.Components.Transform"/> class.
+			</summary>
+			<remarks>
+				Initializes the transform with zero vectors for position, rotation, and scale.
+			</remarks>
+		</member>
+		<member name="M:ScapeCore.Core.Engine.Components.Transform.#ctor(Microsoft.Xna.Framework.Vector2,Microsoft.Xna.Framework.Vector2,Microsoft.Xna.Framework.Vector2)">
+			<summary>
+				Constructor for the <see cref="ScapeCore.Core.Engine.Components.Transform"/> class with specified vectors for position, rotation, and scale.
+			</summary>
+			<param name="position">The position vector of the transform.</param>
+			<param name="rotation">The rotation vector of the transform.</param>
+			<param name="scale">The scale vector of the transform.</param>
+			<remarks>
+				Initializes the transform with the specified vectors for position, rotation, and scale.
+			</remarks>
+		</member>
+
+		<!-- Overrides -->
+		<member name="M:ScapeCore.Core.Engine.Components.Transform.OnCreate">
+			<summary>Executes when the transform is created.</summary>
+			<remarks>
+				This method can be overridden to perform additional tasks when the transform is created.
+			</remarks>
+		</member>
+		<member name="M:ScapeCore.Core.Engine.Components.Transform.OnDestroy">
+			<summary>Executes when the transform is destroyed.</summary>
+			<remarks>
+				This method can be overridden to perform additional tasks when the transform is destroyed.
+			</remarks>
+		</member>
+	</members>
+</doc>

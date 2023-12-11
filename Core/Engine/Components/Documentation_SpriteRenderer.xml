@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+	<assembly>
+		<name>Your.Assembly.Name</name>
+	</assembly>
+	<members>
+		<!-- SpriteRenderer Class -->
+		<member name="T:ScapeCore.Core.Engine.Components.SpriteRenderer">
+			<summary>Represents a class for rendering sprites in the ScapeCore engine.</summary>
+			<remarks>
+				This class is derived from the Renderer class and specializes in rendering sprite visuals.
+			</remarks>
+		</member>
+
+		<!-- Properties -->
+		<member name="P:ScapeCore.Core.Engine.Components.SpriteRenderer.rtransform">
+			<summary>
+				Gets or sets the <see cref="ScapeCore.Core.Engine.Components.RectTransform"/> for the sprite.
+			</summary>
+			<remarks>
+				The RectTransform property represents the transformation information for positioning, scaling, and rotating the sprite.
+			</remarks>
+		</member>
+		<member name="P:ScapeCore.Core.Engine.Components.SpriteRenderer.spriteEffects">
+			<summary>
+				Gets or sets the <see cref="Microsoft.Xna.Framework.Graphics.SpriteEffects"/> for the sprite rendering.
+			</summary>
+			<remarks>
+				The SpriteEffects property represents the rendering effects applied to the sprite, such as flipping or rotating.
+			</remarks>
+		</member>
+		<member name="P:ScapeCore.Core.Engine.Components.SpriteRenderer.depth">
+			<summary>Gets or sets the rendering depth of the sprite.</summary>
+			<remarks>
+				The Depth property represents the depth at which the sprite is rendered, affecting its layering in the scene.
+			</remarks>
+		</member>
+
+		<!-- Constructors -->
+		<member name="M:ScapeCore.Core.Engine.Components.SpriteRenderer.#ctor">
+			<summary>
+				Default constructor for the <see cref="ScapeCore.Core.Engine.Components.SpriteRenderer"/> class.
+			</summary>
+			<remarks>
+				Initializes a new instance of the SpriteRenderer class with a default name and no assigned texture.
+			</remarks>
+		</member>
+		<member name="M:ScapeCore.Core.Engine.Components.SpriteRenderer.#ctor(System.String)">
+			<summary>
+				Constructor for the <see cref="ScapeCore.Core.Engine.Components.SpriteRenderer"/> class with a specified texture name.
+			</summary>
+			<param name="texture">The name of the texture to be retrieved from the resource manager.</param>
+			<remarks>
+				Initializes a new instance of the SpriteRenderer class with the specified texture name, default RectTransform, SpriteEffects.None, and depth 0.
+			</remarks>
+		</member>
+		<member name="M:ScapeCore.Core.Engine.Components.SpriteRenderer.#ctor(Microsoft.Xna.Framework.Graphics.Texture2D)">
+			<summary>
+				Constructor for the <see cref="ScapeCore.Core.Engine.Components.SpriteRenderer"/> class with a specified texture.
+			</summary>
+			<param name="texture">The texture to be used for rendering.</param>
+			<remarks>
+				Initializes a new instance of the SpriteRenderer class with the specified texture, default RectTransform, SpriteEffects.None, and depth 0.
+			</remarks>
+		</member>
+		<member name="M:ScapeCore.Core.Engine.Components.SpriteRenderer.#ctor(System.String,ScapeCore.Core.Engine.Components.RectTransform,Microsoft.Xna.Framework.Graphics.SpriteEffects,System.Single)">
+			<summary>
+				Constructor for the <see cref="ScapeCore.Core.Engine.Components.SpriteRenderer"/> class with a specified texture, RectTransform, SpriteEffects, and depth.
+			</summary>
+			<param name="texture">The name of the texture to be retrieved from the resource manager.</param>
+			<param name="rtransform">The RectTransform defining the transformation of the sprite.</param>
+			<param name="spriteEffects">The rendering effects applied to the sprite.</param>
+			<param name="depth">The depth at which the sprite is rendered.</param>
+			<remarks>
+				Initializes a new instance of the SpriteRenderer class with the specified texture, RectTransform, SpriteEffects, and depth.
+			</remarks>
+		</member>
+		<member name="M:ScapeCore.Core.Engine.Components.SpriteRenderer.#ctor(Microsoft.Xna.Framework.Graphics.Texture2D,ScapeCore.Core.Engine.Components.RectTransform,Microsoft.Xna.Framework.Graphics.SpriteEffects,System.Single)">
+			<summary>
+				Constructor for the <see cref="ScapeCore.Core.Engine.Components.SpriteRenderer"/> class with a specified texture, RectTransform, SpriteEffects, and depth.
+			</summary>
+			<param name="texture">The texture to be used for rendering.</param>
+			<param name="rtransform">The RectTransform defining the transformation of the sprite.</param>
+			<param name="spriteEffects">The rendering effects applied to the sprite.</param>
+			<param name="depth">The depth at which the sprite is rendered.</param>
+			<remarks>
+				Initializes a new instance of the SpriteRenderer class with the specified texture, RectTransform, SpriteEffects, and depth.
+			</remarks>
+		</member>
+
+		<!-- Methods -->
+		<member name="M:ScapeCore.Core.Engine.Components.SpriteRenderer.Render">
+			<summary>Overrides the Render method to render the sprite using SpriteBatch.Draw.</summary>
+			<remarks>
+				This method is called to render the sprite using the assigned texture, RectTransform, sprite effects, and depth.
+			</remarks>
+		</member>
+	</members>
+</doc>

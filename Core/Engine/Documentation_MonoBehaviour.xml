@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+	<assembly>
+		<name>Your.Assembly.Name</name>
+	</assembly>
+	<members>
+		<!-- MonoBehaviour Class -->
+		<member name="T:ScapeCore.Core.Engine.MonoBehaviour">
+			<summary>
+				Represents a base class for components in the ScapeCore engine that require initialization and periodic updates.
+			</summary>
+			<remarks>
+				This class extends the <see cref="ScapeCore.Core.Engine.Behaviour"/> class and provides functionality for handling initialization, updates, and destruction of components.
+			</remarks>
+		</member>
+
+		<!-- Fields -->
+		<member name="F:ScapeCore.Core.Engine.MonoBehaviour._started">
+			<summary>Flag indicating whether the `Start` method has been called.</summary>
+		</member>
+		<member name="F:ScapeCore.Core.Engine.MonoBehaviour.gameObject">
+			<summary>
+				The associated <see cref="ScapeCore.Core.Engine.GameObject"/>.
+			</summary>
+		</member>
+		<member name="F:ScapeCore.Core.Engine.MonoBehaviour._time">
+			<summary>
+				The <see cref="Microsoft.Xna.Framework.GameTime"/> object associated with the last update.
+			</summary>
+		</member>
+
+		<!-- Properties -->
+		<member name="P:ScapeCore.Core.Engine.MonoBehaviour.Time">
+			<summary>
+				Gets the <see cref="Microsoft.Xna.Framework.GameTime"/> object associated with the last update.
+			</summary>
+		</member>
+		<member name="P:ScapeCore.Core.Engine.MonoBehaviour.transform">
+			<summary>
+				Gets the <see cref="ScapeCore.Core.Engine.Transform"/> associated with the <see cref="ScapeCore.Core.Engine.GameObject"/>.
+			</summary>
+		</member>
+
+		<!-- Constructors -->
+		<member name="M:ScapeCore.Core.Engine.MonoBehaviour.#ctor">
+			<summary>
+				Default constructor for the <see cref="ScapeCore.Core.Engine.MonoBehaviour"/> class.
+			</summary>
+			<remarks>
+				Creates a new instance of the class, initializes the associated <see cref="ScapeCore.Core.Engine.GameObject"/>, and adds the component to the <see cref="ScapeCore.Core.Engine.Game"/>.
+			</remarks>
+		</member>
+		<member name="M:ScapeCore.Core.Engine.MonoBehaviour.#ctor(System.Collections.Generic.IEnumerable{ScapeCore.Core.Engine.Behaviour})">
+			<summary>
+				Constructor for the <see cref="ScapeCore.Core.Engine.MonoBehaviour"/> class that takes a collection of additional behaviours.
+			</summary>
+			<param name="behaviours">
+				Additional behaviours to be added to the <see cref="ScapeCore.Core.Engine.GameObject"/>.
+			</param>
+		</member>
+
+		<!-- Methods -->
+		<member name="M:ScapeCore.Core.Engine.MonoBehaviour.Clone``1(``0)">
+			<summary>
+				Creates a deep copy of the specified <see cref="ScapeCore.Core.Engine.MonoBehaviour"/>.
+			</summary>
+			<typeparam name="T">
+				Type of the <see cref="ScapeCore.Core.Engine.MonoBehaviour"/> to clone.
+			</typeparam>
+			<param name="monoBehaviour">
+				The <see cref="ScapeCore.Core.Engine.MonoBehaviour"/> to clone.
+			</param>
+			<returns>
+				A deep copy of the specified <see cref="ScapeCore.Core.Engine.MonoBehaviour"/>.
+			</returns>
+		</member>
+		<member name="M:ScapeCore.Core.Engine.MonoBehaviour.OnCreate">
+			<summary>Called when the component is created.</summary>
+			<remarks>
+				Adds the component to the <see cref="ScapeCore.Core.Engine.Game"/> and subscribes to the start and update events.
+			</remarks>
+		</member>
+		<member name="M:ScapeCore.Core.Engine.MonoBehaviour.OnDestroy">
+			<summary>Called when the component is destroyed.</summary>
+			<remarks>
+				Removes the component from the <see cref="ScapeCore.Core.Engine.Game"/> and unsubscribes from the start and update events.
+			</remarks>
+		</member>
+		<member name="M:ScapeCore.Core.Engine.MonoBehaviour.Start">
+			<summary>Called when the component is started for the first time.</summary>
+			<remarks>
+				Override this method to perform initialization logic for the component.
+			</remarks>
+		</member>
+		<member name="M:ScapeCore.Core.Engine.MonoBehaviour.Update">
+			<summary>Called during each update cycle of the component.</summary>
+			<remarks>
+				Override this method to perform periodic update logic for the component.
+			</remarks>
+		</member>
+	</members>
+</doc>

@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+  <assembly>
+    <name>Your.Assembly.Name</name>
+  </assembly>
+  <members>
+    <!-- SerializationManager Class -->
+    <member name="T:ScapeCore.Core.Serialization.SerializationManager">
+      <summary>
+        Provides serialization and deserialization functionality for ScapeCore types.
+      </summary>
+      <remarks>
+        This class manages the serialization and deserialization of specified types using ProtoBuf serialization with optional GZip compression.
+      </remarks>
+    </member>
+
+    <!-- Constants -->
+    <member name="F:ScapeCore.Core.Serialization.SerializationManager.GZIP_BUFFER_SIZE">
+      <summary>The buffer size used for GZip compression.</summary>
+    </member>
+    <member name="F:ScapeCore.Core.Serialization.SerializationManager.FIELD_PROTOBUF_INDEX">
+      <summary>The starting index for fields in the ProtoBuf model.</summary>
+    </member>
+    <!-- Add documentation for other constants -->
+
+    <!-- Properties -->
+    <member name="P:ScapeCore.Core.Serialization.SerializationManager.Model">
+      <summary>Gets the runtime type model used for serialization.</summary>
+      <remarks>Returns the current runtime type model used by the SerializationManager.</remarks>
+    </member>
+
+    <!-- Constructors -->
+    <member name="M:ScapeCore.Core.Serialization.SerializationManager.#ctor">
+      <summary>Static constructor for the SerializationManager class.</summary>
+      <remarks>
+        Initializes the ProtoBuf runtime type model and configures it for the specified types.
+        Logs configuration information for each type and its fields.
+      </remarks>
+    </member>
+
+    <!-- Methods -->
+    <member name="M:ScapeCore.Core.Serialization.SerializationManager.AddType(System.Type)">
+      <summary>Adds a type to the runtime type model for serialization.</summary>
+      <param name="type">The type to add to the runtime type model.</param>
+      <remarks>
+        Adds the specified type to the ProtoBuf runtime type model, configuring its fields for serialization.
+        Also, sets up subtype information if the type has a base type.
+      </remarks>
+    </member>
+    <!-- Add documentation for other methods -->
+
+    <!-- Enums -->
+    <member name="T:ScapeCore.Core.Serialization.SerializationManager.SerializationError">
+      <summary>Enumerates possible errors during serialization.</summary>
+    </member>
+    <member name="T:ScapeCore.Core.Serialization.SerializationManager.DeserializationError">
+      <summary>Enumerates possible errors during deserialization.</summary>
+    </member>
+    <member name="T:ScapeCore.Core.Serialization.SerializationManager.ChangeModelError">
+      <summary>Enumerates possible errors when changing the serialization model.</summary>
+    </member>
+
+    <!-- Structs -->
+    <member name="T:ScapeCore.Core.Serialization.SerializationManager.SerializationOutput">
+      <summary>Represents the output of a serialization operation.</summary>
+    </member>
+    <member name="T:ScapeCore.Core.Serialization.SerializationManager.DeserializationOutput`1">
+      <summary>Represents the output of a deserialization operation.</summary>
+    </member>
+    <member name="T:ScapeCore.Core.Serialization.SerializationManager.ChangeModelOutput">
+      <summary>Represents the output of a change model operation.</summary>
+    </member>
+  </members>
+</doc>

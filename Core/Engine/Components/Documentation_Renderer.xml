@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+	<assembly>
+		<name>Your.Assembly.Name</name>
+	</assembly>
+	<members>
+		<!-- Renderer Class -->
+		<member name="T:ScapeCore.Core.Engine.Components.Renderer">
+			<summary>Represents an abstract class for rendering components in the ScapeCore engine.</summary>
+			<remarks>
+				This class is the base class for components responsible for rendering visuals in the ScapeCore engine.
+			</remarks>
+		</member>
+
+		<!-- Properties -->
+		<member name="P:ScapeCore.Core.Engine.Components.Renderer.texture">
+			<summary>Gets or sets the texture used for rendering.</summary>
+			<remarks>
+				The texture represents the visual content that will be rendered by this component.
+			</remarks>
+		</member>
+		<member name="P:ScapeCore.Core.Engine.Components.Renderer.Time">
+			<summary>
+				Gets the <see cref="ScapeCore.Core.Batching.GameTime"/> associated with the rendering event.
+			</summary>
+			<remarks>
+				The Time property provides the time information associated with the rendering event.
+			</remarks>
+		</member>
+
+		<!-- Constructors -->
+		<member name="M:ScapeCore.Core.Engine.Components.Renderer.#ctor">
+			<summary>
+				Default constructor for the <see cref="ScapeCore.Core.Engine.Components.Renderer"/> class.
+			</summary>
+			<remarks>
+				Initializes a new instance of the Renderer class with no assigned texture.
+			</remarks>
+		</member>
+		<member name="M:ScapeCore.Core.Engine.Components.Renderer.#ctor(Microsoft.Xna.Framework.Graphics.Texture2D)">
+			<summary>
+				Constructor for the <see cref="ScapeCore.Core.Engine.Components.Renderer"/> class with a specified texture.
+			</summary>
+			<param name="texture">The texture to be used for rendering.</param>
+			<remarks>
+				Initializes a new instance of the Renderer class with the specified texture.
+			</remarks>
+		</member>
+		<member name="M:ScapeCore.Core.Engine.Components.Renderer.#ctor(System.String)">
+			<summary>
+				Constructor for the <see cref="ScapeCore.Core.Engine.Components.Renderer"/> class with a specified texture name.
+			</summary>
+			<param name="textureName">The name of the texture to be retrieved from the resource manager.</param>
+			<remarks>
+				Initializes a new instance of the Renderer class with the specified texture name.
+			</remarks>
+		</member>
+		<member name="M:ScapeCore.Core.Engine.Components.Renderer.#ctor(System.Text.StringBuilder)">
+			<summary>
+				Constructor for the <see cref="ScapeCore.Core.Engine.Components.Renderer"/> class with a specified name.
+			</summary>
+			<param name="name">The name for the renderer.</param>
+			<remarks>
+				Initializes a new instance of the Renderer class with the specified name.
+			</remarks>
+		</member>
+
+		<!-- Methods -->
+		<member name="M:ScapeCore.Core.Engine.Components.Renderer.Render">
+			<summary>Abstract method to be implemented by derived classes for rendering visuals.</summary>
+			<remarks>
+				This method is called to render the visual content using the assigned texture.
+			</remarks>
+		</member>
+		<member name="M:ScapeCore.Core.Engine.Components.Renderer.RenderWrapper">
+			<summary>Wrapper method for the rendering event to handle time information.</summary>
+			<param name="source">The source object triggering the rendering event.</param>
+			<param name="args">
+				The <see cref="ScapeCore.Core.Batching.Events.RenderBatchEventArgs"/> containing event information.
+			</param>
+			<remarks>
+				This method is responsible for handling the rendering event, providing time information to the Render method.
+			</remarks>
+		</member>
+	</members>
+</doc>

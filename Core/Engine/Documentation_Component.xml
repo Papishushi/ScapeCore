@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+	<assembly>
+		<name>Your.Assembly.Name</name>
+	</assembly>
+	<members>
+		<!-- Component Class -->
+		<member name="T:ScapeCore.Core.Engine.Component">
+			<summary>Represents a base class for components in the ScapeCore engine that are attached to game objects.</summary>
+			<remarks>
+				This class extends the functionality of the <see cref="ScapeCore.Core.Engine.Behaviour"/> class and adds the ability to be associated with a specific game object.
+			</remarks>
+		</member>
+
+		<!-- Properties -->
+		<member name="P:ScapeCore.Core.Engine.Component.gameObject">
+			<summary>
+				Gets or sets the <see cref="ScapeCore.Core.Engine.GameObject"/> associated with the <see cref="ScapeCore.Core.Engine.Component"/>.
+			</summary>
+			<remarks>
+				This property provides access to the game object to which the component is attached.
+			</remarks>
+		</member>
+
+		<!-- Constructors -->
+		<member name="M:ScapeCore.Core.Engine.Component.#ctor">
+			<summary>
+				Default constructor for the <see cref="ScapeCore.Core.Engine.Component"/> class.
+			</summary>
+			<remarks>
+				Initializes the component with the default name and sets the associated game object to null.
+			</remarks>
+		</member>
+		<member name="M:ScapeCore.Core.Engine.Component.#ctor(System.String)">
+			<summary>
+				Constructor for the <see cref="ScapeCore.Core.Engine.Component"/> class with a specified name.
+			</summary>
+			<param name="name">
+				The name of the <see cref="ScapeCore.Core.Engine.Component"/>.
+			</param>
+			<remarks>
+				Initializes the component with the specified name and sets the associated game object to null.
+			</remarks>
+		</member>
+	</members>
+</doc>
