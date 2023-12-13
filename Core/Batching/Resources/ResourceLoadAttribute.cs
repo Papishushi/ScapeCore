@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Data;
-using System.Linq;
 
 namespace ScapeCore.Core.Batching.Resources
 {

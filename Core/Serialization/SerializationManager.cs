@@ -4,13 +4,13 @@ using MonoGame.Framework.Utilities.Deflate;
 using ProtoBuf.Meta;
 using ScapeCore.Core.Batching.Events;
 using ScapeCore.Core.Batching.Resources;
+using ScapeCore.Core.Batching.Tools;
 using ScapeCore.Core.Engine;
 using ScapeCore.Core.Engine.Components;
 using ScapeCore.Targets;
 using Serilog;
 using System;
 using System.IO;
-using System.Xml.Serialization;
 
 
 namespace ScapeCore.Core.Serialization
@@ -28,6 +28,7 @@ namespace ScapeCore.Core.Serialization
 
         private readonly static Type[] _types =
         {
+            typeof(DeeplyMutableType),
             typeof(LLAM),
 
             typeof(Behaviour),

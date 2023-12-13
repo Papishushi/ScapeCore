@@ -12,13 +12,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)Batching\Resources\ResourceDependencyTree.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batching\Resources\ResourceInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batching\Resources\ResourceWrapper.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Batching\Tools\IRuntimeValue.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Batching\Tools\DeeplyMutableType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batching\Events\LoadBatchEventArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batching\Tools\ReflectiveEnumerator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batching\Events\RenderBatchEventArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batching\Resources\ResourceLoadAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batching\Resources\ResourceManager.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Batching\Tools\RuntimeValue.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batching\Events\StartBatchEventArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batching\Events\UpdateBatchEventArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Collections\Merkle\MerkleNode.cs" />
@@ -39,12 +38,8 @@
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)Batching\Events\" />
     <Folder Include="$(MSBuildThisFileDirectory)Batching\Resources\" />
-    <Folder Include="$(MSBuildThisFileDirectory)Batching\Tools\" />
+	<Folder Include="$(MSBuildThisFileDirectory)Batching\Tools\" />
     <Folder Include="$(MSBuildThisFileDirectory)Collections\Merkle\" />
     <Folder Include="$(MSBuildThisFileDirectory)Content\" />
-  </ItemGroup>
-  <ItemGroup>
-    <MonoGameContentReference Include="$(MSBuildThisFileDirectory)Content\Content.mgcb" />
-    <None Include="$(MSBuildThisFileDirectory)Content\Content.mgcb" />
   </ItemGroup>
 </Project>

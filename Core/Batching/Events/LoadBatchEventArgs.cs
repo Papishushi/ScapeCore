@@ -1,5 +1,4 @@
-﻿using Microsoft.Xna.Framework;
-using System;
+﻿using System;
 
 namespace ScapeCore.Core.Batching.Events
 {
@@ -7,7 +6,7 @@ namespace ScapeCore.Core.Batching.Events
     internal sealed class LoadBatchEventArgs : EventArgs
     {
         private readonly string eventInfo;
-        public LoadBatchEventArgs(string Text) =>eventInfo = Text;
+        public LoadBatchEventArgs(string Text) => eventInfo = Text;
         public string GetInfo() => eventInfo;
     }
 }

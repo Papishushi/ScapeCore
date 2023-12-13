@@ -1,20 +1,21 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System.Collections.Immutable;
 
 namespace ScapeCore.Core.Batching.Resources
 {
     public readonly record struct ResourceDependencyTree
     {
-        private readonly Dictionary<string, ResourceWrapper> _resourcesPerName = new();
-        private readonly List<KeyValuePair<Type, ResourceInfo>> _dependenciesPerType = new();
-        private readonly Dictionary<ResourceInfo, ResourceWrapper> _dependencies = new();
+        private readonly ConcurrentDictionary<string, ResourceWrapper> _resourcesPerName = new();
+        private readonly ConcurrentBag<KeyValuePair<Type, ResourceInfo>> _dependenciesPerType = new();
+        private readonly ConcurrentDictionary<ResourceInfo, ResourceWrapper> _dependencies = new();
 
-        public ReadOnlyDictionary<string, ResourceWrapper> ResourcesPerName => new(_resourcesPerName);
+        public ImmutableDictionary<string, ResourceWrapper> ResourcesPerName => _resourcesPerName.ToImmutableDictionary();
 
-        public ReadOnlyCollection<KeyValuePair<Type, ResourceInfo>> DependenciesPerType => new(_dependenciesPerType);
+        public ImmutableList<KeyValuePair<Type, ResourceInfo>> DependenciesPerType => _dependenciesPerType.ToImmutableList();
 
-        public ReadOnlyDictionary<ResourceInfo, ResourceWrapper> Dependencies => new(_dependencies);
+        public ImmutableDictionary<ResourceInfo, ResourceWrapper> Dependencies => _dependencies.ToImmutableDictionary();
 
         public void Add(ResourceInfo info, Type dependency, dynamic resource)
         {
@@ -23,25 +24,22 @@ namespace ScapeCore.Core.Batching.Resources
                 _dependencies[info].dependencies.Add(dependency);
             else
             {
-                var wrapper = new ResourceWrapper(dependency)
-                {
-                    resource = resource
-                };
-                _dependencies.Add(info, wrapper);
+                var wrapper = new ResourceWrapper(resource, dependency);
+                _dependencies.TryAdd(info, wrapper);
                 if (_resourcesPerName.ContainsKey(info.ResourceName))
                     _resourcesPerName[info.ResourceName] = wrapper;
                 else
-                    _resourcesPerName.Add(info.ResourceName, wrapper);
+                    _resourcesPerName.TryAdd(info.ResourceName, wrapper);
             }
 
         }
 
         public bool ContainsResource(ResourceInfo info) => _dependencies.ContainsKey(info);
         public bool ContainsResource(string name) => _resourcesPerName.ContainsKey(name);
-        public bool IsTypeDependent(Type type) => !_dependenciesPerType.Find(t => t.Key == type).Equals(default(KeyValuePair<Type, ResourceInfo>));
+        public bool IsTypeDependent(Type type) => !DependenciesPerType.Find(t => t.Key == type).Equals(default(KeyValuePair<Type, ResourceInfo>));
 
         public ResourceWrapper GetResource(string resourceName) => _resourcesPerName[resourceName];
-        public ResourceWrapper GetResource(Type type) => _dependencies[_dependenciesPerType.Find(x => x.Key == type).Value];
+        public ResourceWrapper GetResource(Type type) => _dependencies[DependenciesPerType.Find(x => x.Key == type).Value];
         public ResourceWrapper GetResource(ResourceInfo info) => _dependencies[info];
 
         public void Clear()

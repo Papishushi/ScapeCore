@@ -1,13 +1,10 @@
-﻿using System;
+﻿using ScapeCore.Core.Engine.Components;
+using ScapeCore.Targets;
+using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using Microsoft.Xna.Framework;
-using ProtoBuf;
-using ScapeCore;
-using ScapeCore.Core.Engine.Components;
-using ScapeCore.Targets;
-using Serilog;
 
 namespace ScapeCore.Core.Engine
 {
@@ -62,9 +59,9 @@ namespace ScapeCore.Core.Engine
         /// <exception cref="System.NullReferenceException"></exception>
         private void BehavioursNullException()
         {
-            if(behaviours == null) throw new System.NullReferenceException($"{nameof(behaviours)} is null");
+            if (behaviours == null) throw new System.NullReferenceException($"{nameof(behaviours)} is null");
         }
-       
+
         public T GetBehaviour<T>() where T : Behaviour
         {
             try
@@ -133,7 +130,7 @@ namespace ScapeCore.Core.Engine
                 behaviour.To<MonoBehaviour>().gameObject = this;
             return behaviour;
         }
-        
+
         public IEnumerator<T> AddBehaviours<T>(params T[] behaviours) where T : Behaviour
         {
             try
@@ -171,7 +168,7 @@ namespace ScapeCore.Core.Engine
                 Log.Error($"Failed to remove behaviour on GameObject {name} {{{Id}}}\t{nRE.Message}");
                 throw;
             }
-            T temp = behaviours.Find(x =>  x.GetType() == typeof(T)).To<T>();
+            T temp = behaviours.Find(x => x.GetType() == typeof(T)).To<T>();
             if (temp == null) return null;
             behaviours.Remove(temp);
             if (typeof(Component).IsAssignableFrom(temp.GetType()))
@@ -213,7 +210,7 @@ namespace ScapeCore.Core.Engine
                 throw;
             }
             var l = new List<T>();
-            foreach(T behaviour in behaviours.Cast<T>())
+            foreach (T behaviour in behaviours.Cast<T>())
             {
                 if (behaviour == null) continue;
                 behaviours.Remove(behaviour);
@@ -223,7 +220,7 @@ namespace ScapeCore.Core.Engine
                     behaviour.To<MonoBehaviour>().gameObject = null;
                 l.Add(behaviour);
             }
-           return l.GetEnumerator();
+            return l.GetEnumerator();
         }
 
         public IEnumerator<T> RemoveBehaviours<T>(params T[] behaviours) where T : Behaviour
@@ -258,6 +255,6 @@ namespace ScapeCore.Core.Engine
 
         public static GameObject FindGameObjectWithTag(string tag) => LLAM.Instance.GameObjects.Find(x => x.tag == tag);
         public static IEnumerator<GameObject> FindGameObjectsWithTag(string tag) => LLAM.Instance.GameObjects.FindAll(x => x.tag == tag).GetEnumerator();
-        
+
     }
 }

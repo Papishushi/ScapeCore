@@ -1,14 +1,10 @@
-﻿using System;
+﻿using Baksteen.Extensions.DeepCopy;
+using Microsoft.Xna.Framework;
+using ScapeCore.Core.Batching.Events;
+using ScapeCore.Core.Engine.Components;
+using Serilog;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using Microsoft.Xna.Framework;
-using ScapeCore.Core.Batching;
-using ScapeCore.Core.Engine.Components;
-using Baksteen.Extensions.DeepCopy;
-using ScapeCore.Core.Batching.Events;
-using Serilog;
-using ProtoBuf;
-using ProtoBuf.Meta;
 
 namespace ScapeCore.Core.Engine
 {

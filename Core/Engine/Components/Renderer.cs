@@ -1,11 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using ScapeCore.Core.Batching;
 using ScapeCore.Core.Batching.Events;
 using ScapeCore.Core.Batching.Resources;
 using Serilog;
-using System;
-using System.Drawing;
 using System.Text;
 
 namespace ScapeCore.Core.Engine.Components
@@ -17,9 +14,9 @@ namespace ScapeCore.Core.Engine.Components
 
         public GameTime Time { get => _time; }
 
-        public Renderer() : base(nameof(Renderer)) => texture = null; 
+        public Renderer() : base(nameof(Renderer)) => texture = null;
         public Renderer(Texture2D texture) : base(nameof(Renderer)) => this.texture=texture;
-        public Renderer(string textureName) : base(nameof(Renderer)) => texture = ResourceManager.GetResource<Texture2D>(textureName);
+        public Renderer(string textureName) : base(nameof(Renderer)) => texture = ResourceManager.GetResource<Texture2D>(textureName).Value;
         protected Renderer(StringBuilder name) : base(name.ToString()) => texture = null;
 
 

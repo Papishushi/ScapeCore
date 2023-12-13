@@ -1,17 +1,12 @@
 ﻿using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.Graphics;
 using ScapeCore.Core.Batching.Events;
 using ScapeCore.Core.Batching.Tools;
 using ScapeCore.Core.Engine;
 using ScapeCore.Targets;
 using Serilog;
-using Serilog.Core;
 using System;
-using System.Collections;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Reflection;
-using System.Text;
+using System.Runtime.CompilerServices;
 
 namespace ScapeCore.Core.Batching.Resources
 {
@@ -21,10 +16,9 @@ namespace ScapeCore.Core.Batching.Resources
 
         public static ResourceDependencyTree Content { get => _tree; }
 
-        internal static void Ping() { return; }
         static ResourceManager() => LLAM.Instance.OnLoad += LoadAllReferencedResources;
 
-        public static T GetResource<T>(string key) => (T)Content.Dependencies[new(key,typeof(T))].resource;
+        public static StrongBox<T> GetResource<T>(string key) => new(((DeeplyMutableType<T>)_tree.Dependencies[new(key, typeof(T))].resource).Value);
 
         private static void LoadAllReferencedResources(object source, LoadBatchEventArgs args)
         {
@@ -54,7 +48,7 @@ namespace ScapeCore.Core.Batching.Resources
             }
 
             foreach (var dependency in _tree.Dependencies)
-                Log.Debug(($"{string.Join(',', dependency.Value.dependencies)} types loaded resource {{{dependency.Key.ResourceName}}} of type {{{dependency.Key.TargetType}}}"));
+                Log.Debug($"{string.Join(',', dependency.Value.dependencies)} types loaded resource {{{dependency.Key.ResourceName}}} of type {{{dependency.Key.TargetType}}}");
         }
     }
 }

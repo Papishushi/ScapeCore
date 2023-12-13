@@ -1,18 +1,15 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using System.Collections.Generic;
-using System;
-using ScapeCore.Core.Engine;
 using ScapeCore.Core.Batching.Events;
-using System.Net.NetworkInformation;
+using ScapeCore.Core.Batching.Resources;
+using ScapeCore.Core.Engine;
+using ScapeCore.Core.Serialization;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
-using ScapeCore.Core.Collections.Merkle;
-using System.Linq;
-using ScapeCore.Core.Serialization;
-using Baksteen.Extensions.DeepCopy;
-using ProtoBuf;
+using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace ScapeCore.Targets
 {
@@ -38,14 +35,15 @@ namespace ScapeCore.Targets
         public LLAM()
         {
             Log.Logger = new LoggerConfiguration().MinimumLevel.Debug().WriteTo.Async(wt => wt.Console(theme: AnsiConsoleTheme.Code)).CreateLogger();
-            
+
             if (Instance != null) throw new InvalidOperationException("LLAM singleton instance is not null");
             else Instance = this;
 
             Log.Debug("Constructing LLAM...");
 
             //Very much important indeed
-            Core.Batching.Resources.ResourceManager.Ping();
+            RuntimeHelpers.RunClassConstructor(typeof(ResourceManager).TypeHandle);
+            RuntimeHelpers.RunClassConstructor(typeof(SerializationManager).TypeHandle);
 
             _graphics = new(this);
             Content.RootDirectory = "Content";
@@ -60,7 +58,7 @@ namespace ScapeCore.Targets
             OnStart += successLoad;
 
             // TODO: Add your initialization logic here
-
+            new Ball();
 
             base.Initialize();
         }
@@ -84,7 +82,7 @@ namespace ScapeCore.Targets
             OnStart?.Invoke(this, new($"Start cycle number {_si++} | Patch size {OnStart.GetInvocationList().Length}"));
             OnStart = null;
             OnUpdate?.Invoke(this, new(gameTime, $"Update cycle number {_ui++} | Patch size {OnUpdate.GetInvocationList().Length}"));
-            
+
             base.Update(gameTime);
         }
 

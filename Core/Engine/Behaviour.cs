@@ -1,5 +1,5 @@
-﻿using System;
-using ScapeCore.Targets;
+﻿using ScapeCore.Targets;
+using System;
 
 namespace ScapeCore.Core.Engine
 {

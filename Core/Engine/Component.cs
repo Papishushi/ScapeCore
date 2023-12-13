@@ -1,7 +1,4 @@
-﻿using ProtoBuf;
-using ScapeCore;
-using System;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace ScapeCore.Core.Engine
 {
