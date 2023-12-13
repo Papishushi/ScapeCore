@@ -40,6 +40,5 @@
     <Folder Include="$(MSBuildThisFileDirectory)Batching\Resources\" />
 	<Folder Include="$(MSBuildThisFileDirectory)Batching\Tools\" />
     <Folder Include="$(MSBuildThisFileDirectory)Collections\Merkle\" />
-    <Folder Include="$(MSBuildThisFileDirectory)Content\" />
   </ItemGroup>
 </Project>
