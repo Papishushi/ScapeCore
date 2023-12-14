@@ -13,6 +13,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Batching\Resources\ResourceInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batching\Resources\ResourceWrapper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batching\Tools\DeeplyMutableType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Batching\Tools\DeeplyMutable.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batching\Events\LoadBatchEventArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batching\Tools\ReflectiveEnumerator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batching\Events\RenderBatchEventArgs.cs" />
