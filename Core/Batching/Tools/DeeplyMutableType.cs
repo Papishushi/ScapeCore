@@ -11,33 +11,42 @@ namespace ScapeCore.Core.Batching.Tools
 
         public override bool TryGetMember(GetMemberBinder binder, out object result)
         {
+            result = null;
             string name = binder.Name.ToLower();
-            var b = name == nameof(Value).ToLower() || name == nameof(_value).ToLower();
-            result = b ? _value : null;
-            return b;
+            var v = name == nameof(Value).ToLower() || name == nameof(_value).ToLower();
+            if (v)
+            {
+                result = _value;
+                return true;
+            }
+            var f = false;
+            foreach (var field in _value.GetType().GetFields())
+                if (name == field.Name)
+                {
+                    result = field.GetValue(Value);
+                    f = true;
+                    break;
+                }
+            return f;
         }
         public override bool TrySetMember(SetMemberBinder binder, object value)
         {
             string name = binder.Name.ToLower();
-            var b = name == nameof(Value).ToLower() || name == nameof(_value).ToLower();
-            _value = b ? value : _value;
-            return b;
-        }
-    }
-
-    public sealed class DeeplyMutable<T> : DeeplyMutableType
-    {
-        public new T Value { get => _value; set => _value = value; }
-        public DeeplyMutable() : base() { }
-        public DeeplyMutable(T value) : base(value) { }
-        public DeeplyMutable(DeeplyMutableType deeplyMutableType) => _value = deeplyMutableType.Value;
-
-        public override bool TrySetMember(SetMemberBinder binder, dynamic value)
-        {
-            string name = binder.Name.ToLower();
-            var b = name == nameof(Value).ToLower() || name == nameof(_value).ToLower();
-            _value = b ? value : _value;
-            return b;
+            var v = name == nameof(Value).ToLower() || name == nameof(_value).ToLower();
+            if (v)
+            {
+                _value = value;
+                return true;
+            }
+            var f = false;
+            foreach (var field in _value.GetType().GetFields())
+                if (name  == field.Name)
+                {
+                    field.SetValue(Value, value);
+                    f = true;
+                    break;
+                }
+            return f;
         }
     }
 }

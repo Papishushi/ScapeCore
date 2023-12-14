@@ -5,6 +5,7 @@ using ProtoBuf.Meta;
 using ScapeCore.Core.Batching.Events;
 using ScapeCore.Core.Batching.Resources;
 using ScapeCore.Core.Batching.Tools;
+using ScapeCore.Core.Collections.Merkle;
 using ScapeCore.Core.Engine;
 using ScapeCore.Core.Engine.Components;
 using ScapeCore.Targets;
@@ -28,6 +29,8 @@ namespace ScapeCore.Core.Serialization
 
         private readonly static Type[] _types =
         {
+            typeof(MerkleNode<>),
+            typeof(MerkleTree<>),
             typeof(DeeplyMutableType),
             typeof(DeeplyMutable<>),
             typeof(LLAM),
