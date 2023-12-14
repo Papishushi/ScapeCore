@@ -12,11 +12,13 @@ ScapeCore is your go-to free and open-source game engine riding on the MonoGame 
 - **Serialize Like a Pro:** Saving and loading game states got you stressed? Chill out with our Serialization Manager. It supports Protocol Buffers and even throws in optional GZip compression – slick and fast.
 - **Resource Wizardry:** The Resource Manager is like a magician, juggling resources in a thread-safe show. Load, distribute, and track dependencies effortlessly. Keep your game running smooth and snappy.
   
-
-
-
 ## Quick Start
 
 ### Prerequisites
 
-- Install [Dependencies](https://github.com/Papishushi/ScapeCore/Dependencies).
+- Install [Dependencies](https://github.com/Papishushi/ScapeCore/network/dependencies).
+
+### Installation
+
+- Clone or download repository.
+- Use it as a MonoGame Dynamic Library.
