@@ -15,7 +15,7 @@ namespace ScapeCore.Core.Engine.Components
         public GameTime Time { get => _time; }
 
         public Renderer() : base(nameof(Renderer)) => texture = null;
-        public Renderer(Texture2D texture) : base(nameof(Renderer)) => this.texture=texture;
+        public Renderer(Texture2D texture) : base(nameof(Renderer)) => this.texture= texture;
         public Renderer(string textureName) : base(nameof(Renderer)) => texture = ResourceManager.GetResource<Texture2D>(textureName).Value;
         protected Renderer(StringBuilder name) : base(name.ToString()) => texture = null;
 

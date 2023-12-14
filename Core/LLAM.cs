@@ -22,7 +22,7 @@ namespace ScapeCore.Targets
 
         public GraphicsDeviceManager Graphics { get => _graphics; }
         public SpriteBatch SpriteBatch { get => _spriteBatch; }
-        public static LLAM Instance { get; private set; }
+        public static WeakReference<LLAM> Instance { get; private set; }
 
         public readonly List<MonoBehaviour> MonoBehaviours = new();
         public readonly List<GameObject> GameObjects = new();
@@ -37,13 +37,13 @@ namespace ScapeCore.Targets
             Log.Logger = new LoggerConfiguration().MinimumLevel.Debug().WriteTo.Async(wt => wt.Console(theme: AnsiConsoleTheme.Code)).CreateLogger();
 
             if (Instance != null) throw new InvalidOperationException("LLAM singleton instance is not null");
-            else Instance = this;
+            else Instance = new(this);
 
             Log.Debug("Constructing LLAM...");
 
             //Very much important indeed
-            RuntimeHelpers.RunClassConstructor(typeof(ResourceManager).TypeHandle);
             RuntimeHelpers.RunClassConstructor(typeof(SerializationManager).TypeHandle);
+            RuntimeHelpers.RunClassConstructor(typeof(ResourceManager).TypeHandle);
 
             _graphics = new(this);
             Content.RootDirectory = "Content";

@@ -15,14 +15,16 @@ namespace ScapeCore.Core.Engine
         ~Behaviour() => OnDestroy();
         public Behaviour()
         {
-            Game =  LLAM.Instance;
+            var b = LLAM.Instance.TryGetTarget(out LLAM target);
+            Game =  b ? target : null;
             name = nameof(Behaviour);
             isActive = true;
             OnCreate();
         }
         protected Behaviour(string name)
         {
-            Game =  LLAM.Instance;
+            var b = LLAM.Instance.TryGetTarget(out LLAM target);
+            Game =  b ? target : null;
             this.name = name;
             isActive = true;
             OnCreate();

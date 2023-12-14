@@ -253,8 +253,18 @@ namespace ScapeCore.Core.Engine
 
         protected override void OnDestroy() => Game.GameObjects.Remove(this);
 
-        public static GameObject FindGameObjectWithTag(string tag) => LLAM.Instance.GameObjects.Find(x => x.tag == tag);
-        public static IEnumerator<GameObject> FindGameObjectsWithTag(string tag) => LLAM.Instance.GameObjects.FindAll(x => x.tag == tag).GetEnumerator();
+        public static GameObject FindGameObjectWithTag(string tag)
+        {
+            var b = LLAM.Instance.TryGetTarget(out LLAM target);
+            if (!b) return null;
+            return target.GameObjects.Find(x => x.tag == tag);
+        }
+        public static IEnumerator<GameObject> FindGameObjectsWithTag(string tag)
+        {
+            var b = LLAM.Instance.TryGetTarget(out LLAM target);
+            if (!b) return null;
+            return target.GameObjects.FindAll(x => x.tag == tag).GetEnumerator();
+        }
 
     }
 }

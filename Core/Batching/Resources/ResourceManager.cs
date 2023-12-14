@@ -16,14 +16,23 @@ namespace ScapeCore.Core.Batching.Resources
 
         public static ResourceDependencyTree Content { get => _tree; }
 
-        static ResourceManager() => LLAM.Instance.OnLoad += LoadAllReferencedResources;
+        static ResourceManager()
+        {
+            LLAM.Instance.TryGetTarget(out LLAM target);
+            target.OnLoad += LoadAllReferencedResources;
+        }
 
-        public static StrongBox<T> GetResource<T>(string key) => new(((DeeplyMutableType<T>)_tree.Dependencies[new(key, typeof(T))].resource).Value);
+        public static StrongBox<T> GetResource<T>(string key) => new(new DeeplyMutable<T>(_tree.Dependencies[new(key, typeof(T))].resource).Value);
 
         private static void LoadAllReferencedResources(object source, LoadBatchEventArgs args)
         {
             Log.Debug($"{source.GetHashCode()} {args.GetInfo()}");
 
+            if (!LLAM.Instance.TryGetTarget(out LLAM target))
+            {
+                Log.Error("ResourceManager was unable to load referenced resources. {LLAM} instance is GCed.", typeof(LLAM).FullName);
+                return;
+            }
             foreach (var type in ReflectiveEnumerator.GetEnumerableOfType<MonoBehaviour>())
             {
                 foreach (var rsrcLoadAttr in Attribute.GetCustomAttributes(type).Where(attr => attr is ResourceLoadAttribute).Cast<ResourceLoadAttribute>())
@@ -37,9 +46,9 @@ namespace ScapeCore.Core.Batching.Resources
                         }
                         else
                         {
-                            var method = typeof(ContentManager).GetMethod(nameof(LLAM.Instance.Content.Load));
+                            var method = typeof(ContentManager).GetMethod(nameof(target.Content.Load));
                             method = method.MakeGenericMethod(info.TargetType);
-                            var result = method.Invoke(LLAM.Instance.Content, new object[1] { info.ResourceName });
+                            var result = method.Invoke(target.Content, new object[1] { info.ResourceName });
                             dynamic changedObject = Convert.ChangeType(result, info.TargetType);
                             _tree.Add(info, type, changedObject);
                         }

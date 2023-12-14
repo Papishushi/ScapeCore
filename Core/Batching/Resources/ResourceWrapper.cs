@@ -1,4 +1,5 @@
 ﻿using ScapeCore.Core.Batching.Tools;
+using Serilog;
 using System;
 using System.Collections.Generic;
 
@@ -17,21 +18,19 @@ namespace ScapeCore.Core.Batching.Resources
         public ResourceWrapper(dynamic resource, Type dependency)
         {
             var unknown = resource.GetType();
-            var type = typeof(DeeplyMutableType<>).MakeGenericType(unknown);
+            var type = typeof(DeeplyMutable<>).MakeGenericType(unknown);
             dynamic context = Activator.CreateInstance(type);
-            context.value = resource;
-            resource = context;
-            this.resource=resource;
+            context.Value = resource;
+            this.resource = context;
             dependencies.Add(dependency);
         }
         public ResourceWrapper(dynamic resource, List<Type> dependencies)
         {
             var unknown = resource.GetType();
-            var type = typeof(DeeplyMutableType<>).MakeGenericType(unknown);
+            var type = typeof(DeeplyMutable<>).MakeGenericType(unknown);
             dynamic context = Activator.CreateInstance(type);
             context.Value = resource;
-            resource = context;
-            this.resource=resource;
+            this.resource = context;
             this.dependencies=dependencies;
         }
     }
