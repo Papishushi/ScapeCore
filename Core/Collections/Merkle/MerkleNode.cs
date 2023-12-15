@@ -40,7 +40,7 @@ namespace ScapeCore.Core.Collections.Merkle
         public static implicit operator int(MerkleNode<T> node) => BitConverter.ToInt32((byte[])node);
         public static implicit operator string(MerkleNode<T> node) => ((int)node).ToString("x");
 
-        public override bool Equals(object obj) => obj is MerkleNode<T> node && result == (byte[])node;
+        public override bool Equals(object? obj) => obj is MerkleNode<T> node && result == (byte[])node;
         public override int GetHashCode() => BitConverter.ToInt32(result);
         public override string ToString() => GetHashCode().ToString("x");
 

@@ -1,5 +1,4 @@
 ﻿using ScapeCore.Core.Batching.Tools;
-using Serilog;
 using System;
 using System.Collections.Generic;
 

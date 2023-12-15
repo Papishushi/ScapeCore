@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Baksteen.Extensions.DeepCopy;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Framework.Utilities.Deflate;
 using ProtoBuf.Meta;
@@ -11,6 +12,9 @@ using ScapeCore.Core.Engine.Components;
 using ScapeCore.Targets;
 using Serilog;
 using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Collections.ObjectModel;
 using System.IO;
 
 
@@ -24,8 +28,13 @@ namespace ScapeCore.Core.Serialization
         private const string SCAPE_CORE_NAME = "ScapeCore";
         private const string PROTOBUFER_COMPRESSED_BINARY = ".pb.bin.gz";
         private const string PROTOBUFFER_BINARY = ".pb.bin";
+        private const string FIELD_ERROR_MESSAGE = "Serialization Manager tried to configure an object/dynamic field named {field} from Type {type}," +
+                            " serializer does not support deeply mutable types, try changing field type to {dmtName}.";
+        private const string PROPERTY_ERROR_MESSAGE = "Serialization Manager tried to configure an object/dynamic property named {property} from Type {type}," +
+                            " serializer does not support deeply mutable types, try changing property type to {dmtName}.";
 
-        private static RuntimeTypeModel _model = null;
+
+        private static RuntimeTypeModel? _model = null;
 
         private readonly static Type[] _types =
         {
@@ -33,6 +42,8 @@ namespace ScapeCore.Core.Serialization
             typeof(MerkleTree<>),
             typeof(DeeplyMutableType),
             typeof(DeeplyMutable<>),
+            typeof(WeakReference<>),
+            typeof(Game),
             typeof(LLAM),
 
             typeof(Behaviour),
@@ -56,7 +67,8 @@ namespace ScapeCore.Core.Serialization
             typeof(RenderBatchEventArgs),
             typeof(GameTime)
         };
-        internal static TypeModel Model { get => _model; }
+        internal static TypeModel? Model { get => _model; }
+        public static RuntimeTypeModel? GetRuntimeClone() => _model?.DeepCopy();
 
         static SerializationManager()
         {
@@ -73,12 +85,48 @@ namespace ScapeCore.Core.Serialization
                 {
                     if (field.FieldType.Name == typeof(object).Name)
                     {
-                        Log.Warning("Serialization Manager tried to configure an object/dynamic field named {field} from Type {type}," +
-                            " serializer does not support deeply mutable types, try changind field type to {dmtName}.", field.Name, type.Name, typeof(DeeplyMutableType).FullName);
+                        Log.Warning(FIELD_ERROR_MESSAGE, field.Name, type.Name, typeof(DeeplyMutableType).FullName);
                         continue;
                     }
                     metaType.Add(fieldIndex++, field.Name);
                     Log.Verbose("\tField [{i}]{field}[{t}] from Type {type}", fieldIndex - 1, field.Name, field.FieldType, type.Name);
+                }
+                foreach (MetaType rtType in runtimeModel.GetTypes())
+                {
+                    if (rtType.Type == type.BaseType)
+                    {
+                        var sub = rtType.GetSubtypes();
+                        if (sub.Length == 0)
+                            rtType.AddSubType(SUBTYPE_PROTOBUF_INDEX, type);
+                        else
+                            rtType.AddSubType(SUBTYPE_PROTOBUF_INDEX + sub.Length, type);
+                        break;
+                    }
+                }
+                if (type == typeof(DeeplyMutableType) || type.BaseType == typeof(DeeplyMutableType))
+                {
+                    runtimeModel.MakeDefault();
+                    _model = runtimeModel;
+                    continue;
+                }
+                foreach (var property in type.GetProperties())
+                {
+                    try
+                    {
+                        if (property.PropertyType.Name == typeof(object).Name)
+                        {
+                            Log.Warning(PROPERTY_ERROR_MESSAGE, property.Name, type.Name, typeof(DeeplyMutableType).FullName);
+                            continue;
+                        }
+                        metaType.Add(fieldIndex++, property.Name);
+                        Log.Verbose("\tProperty [{i}]{property}[{t}] from Type {type}", fieldIndex - 1, property.Name, property.PropertyType, type.Name);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warning("Serialization Manager can not determine type of property {property} from {type}.", property.Name, type);
+                        Log.Verbose("{ex}", ex.Message);
+                        continue;
+                    }
                 }
             }
             runtimeModel.MakeDefault();
@@ -87,6 +135,11 @@ namespace ScapeCore.Core.Serialization
 
         public static void AddType(Type type)
         {
+            if (_model == null)
+            {
+                Log.Warning("Serialization Manager can not add a type {t} becouse serialization model is null.", type.FullName);
+                return;
+            }
             var fieldIndex = FIELD_PROTOBUF_INDEX;
             var metaType = _model.Add(type, false);
             metaType.IgnoreUnknownSubTypes = false;
@@ -95,8 +148,7 @@ namespace ScapeCore.Core.Serialization
             {
                 if (field.FieldType.Name == typeof(object).Name)
                 {
-                    Log.Warning("Serialization Manager tried to configure an object/dynamic field named {field} from Type {type}," +
-                        " serializer does not support deeply mutable types, try changind field type to {dmtName}.", field.Name, type.Name, typeof(DeeplyMutableType).FullName);
+                    Log.Warning(FIELD_ERROR_MESSAGE, field.Name, type.Name, typeof(DeeplyMutableType).FullName);
                     continue;
                 }
                 metaType.Add(fieldIndex++, field.Name);
@@ -114,6 +166,26 @@ namespace ScapeCore.Core.Serialization
                     break;
                 }
             }
+            if (type == typeof(DeeplyMutableType) || type.BaseType == typeof(DeeplyMutableType)) return;
+            foreach (var property in type.GetProperties())
+            {
+                try
+                {
+                    if (property.PropertyType.Name == typeof(object).Name)
+                    {
+                        Log.Warning(PROPERTY_ERROR_MESSAGE, property.Name, type.Name, typeof(DeeplyMutableType).FullName);
+                        continue;
+                    }
+                    metaType.Add(fieldIndex++, property.Name);
+                    Log.Verbose("\tField [{i}]{field}[{t}] from Type {type}", fieldIndex - 1, property.Name, property.PropertyType, type.Name);
+                }
+                catch (Exception ex)
+                {
+                    Log.Warning("Serialization Manager can not determine type of property {property} from {type}.", property.Name, type);
+                    Log.Verbose("{ex}", ex.Message);
+                    continue;
+                }
+            }
         }
 
         public enum SerializationError
@@ -126,16 +198,22 @@ namespace ScapeCore.Core.Serialization
             PathTooLong,
             DirectoryNotFound,
             NotSupported,
-            Serilog
+            Serilog,
+            ModelNull
         }
-        public readonly record struct SerializationOutput(SerializationError Error, byte[] Data, long Size, string Path, bool Compressed);
-        public static SerializationOutput Serialize<T>(T obj, string path, bool compress = false, object userState = null)
+        public readonly record struct SerializationOutput(SerializationError Error, byte[]? Data, long Size, string Path, bool Compressed);
+        public static SerializationOutput Serialize<T>(T obj, string path, bool compress = false, object? userState = null)
         {
             long size = 0;
-            byte[] data = null;
+            byte[]? data = null;
             string fileName = compress ? typeof(T).Name + PROTOBUFER_COMPRESSED_BINARY : typeof(T).Name + PROTOBUFFER_BINARY;
             const string ERROR_FORMAT = "Serialization to path {path} failed: {ex}";
 
+            if (_model == null)
+            {
+                Log.Warning(ERROR_FORMAT, path, "Serialization model is null.");
+                return new() { Error = SerializationError.ModelNull, Data = data, Size = size, Path = path, Compressed = compress };
+            }
             if (!_model.CanSerialize(typeof(T)))
             {
                 Log.Error(ERROR_FORMAT, $"Type {typeof(T).FullName} can't be serialized.");
@@ -200,12 +278,17 @@ namespace ScapeCore.Core.Serialization
             }
             return new() { Error = SerializationError.None, Data = data, Size = size, Path = path, Compressed = compress };
         }
-        public static SerializationOutput Serialize<T>(T obj, bool compress = false, object userState = null)
+        public static SerializationOutput Serialize<T>(T obj, bool compress = false, object? userState = null)
         {
             long size = 0;
             byte[] data = new byte[GZIP_BUFFER_SIZE]; ;
             const string ERROR_FORMAT = "Serialization failed: {ex}";
 
+            if (_model == null)
+            {
+                Log.Warning(ERROR_FORMAT, "Serialization model is null.");
+                return new() { Error = SerializationError.ModelNull, Data = data, Size = size, Path = string.Empty, Compressed = compress };
+            }
             if (!_model.CanSerialize(typeof(T)))
             {
                 Log.Error(ERROR_FORMAT, $"Type {typeof(T).FullName} can't be serialized.");
@@ -279,19 +362,25 @@ namespace ScapeCore.Core.Serialization
             FileNotFound,
             NotSupported,
             IO,
-            Serilog
+            Serilog,
+            ModelNull
         }
-        public readonly record struct DeserializationOutput<T>(DeserializationError Error, T Output, string Path, bool Decompressed);
-        public static DeserializationOutput<T> Deserialize<T>(string path, T obj = default, bool decompress = false, object userState = null)
+        public readonly record struct DeserializationOutput<T>(DeserializationError Error, T? Output, string Path, bool Decompressed);
+        public static DeserializationOutput<T> Deserialize<T>(string path, T? obj = default, bool decompress = false, object? userState = null)
         {
-            T deserialized = default;
+            T? deserialized = default;
             string fileName = decompress ? typeof(T).Name+PROTOBUFER_COMPRESSED_BINARY : typeof(T).Name+PROTOBUFFER_BINARY;
             const string ERROR_FORMAT = "Deserialization to path {path} failed: {ex}";
 
+            if (_model == null)
+            {
+                Log.Warning(ERROR_FORMAT, path, "Serialization model is null.");
+                return new() { Error = DeserializationError.ModelNull, Output = deserialized, Path = path };
+            }
             if (!_model.CanSerialize(typeof(T)))
             {
                 Log.Error(ERROR_FORMAT, $"Type {typeof(T).FullName} can't be deserialized.");
-                return new() { Error = DeserializationError.NotSerializable, Output = deserialized };
+                return new() { Error = DeserializationError.NotSerializable, Output = deserialized, Path = path };
             }
             if (string.IsNullOrEmpty(path)) return new() { Error = DeserializationError.NullPath, Output = deserialized, Path = path };
             try
@@ -360,16 +449,20 @@ namespace ScapeCore.Core.Serialization
             return new() { Error = DeserializationError.None, Output = deserialized, Path = path };
         }
 
-        public static DeserializationOutput<T> Deserialize<T>(byte[] serialized, bool decompress = false, object userState = null)
+        public static DeserializationOutput<T> Deserialize<T>(byte[] serialized, bool decompress = false, object? userState = null)
         {
-            T deserialized = default;
-            string fileName = decompress ? typeof(T).Name+PROTOBUFER_COMPRESSED_BINARY : typeof(T).Name+PROTOBUFFER_BINARY;
+            T? deserialized = default;
             const string ERROR_FORMAT = "Deserialization failed: {ex}";
 
+            if (_model == null)
+            {
+                Log.Warning(ERROR_FORMAT, "Serialization model is null.");
+                return new() { Error = DeserializationError.ModelNull, Output = deserialized, Path = string.Empty };
+            }
             if (!_model.CanSerialize(typeof(T)))
             {
                 Log.Error(ERROR_FORMAT, $"Type {typeof(T).FullName} can't be deserialized.");
-                return new() { Error = DeserializationError.NotSerializable, Output = deserialized };
+                return new() { Error = DeserializationError.NotSerializable, Output = deserialized, Path = string.Empty };
             }
             try
             {
@@ -392,49 +485,49 @@ namespace ScapeCore.Core.Serialization
             catch (UnauthorizedAccessException ex)
             {
                 Log.Error(ERROR_FORMAT, ex.Message);
-                return new() { Error = DeserializationError.UnauthorizedAccess, Output = deserialized };
+                return new() { Error = DeserializationError.UnauthorizedAccess, Output = deserialized, Path = string.Empty };
             }
             catch (ArgumentNullException ex)
             {
                 Log.Error(ERROR_FORMAT, ex.Message);
-                return new() { Error = DeserializationError.NullPath, Output = deserialized };
+                return new() { Error = DeserializationError.NullPath, Output = deserialized, Path = string.Empty };
             }
             catch (ArgumentException ex)
             {
                 Log.Error(ERROR_FORMAT, ex.Message);
-                return new() { Error = DeserializationError.PathNotValid, Output = deserialized };
+                return new() { Error = DeserializationError.PathNotValid, Output = deserialized, Path = string.Empty };
             }
             catch (PathTooLongException ex)
             {
                 Log.Error(ERROR_FORMAT, ex.Message);
-                return new() { Error = DeserializationError.PathTooLong, Output = deserialized };
+                return new() { Error = DeserializationError.PathTooLong, Output = deserialized, Path = string.Empty };
             }
             catch (DirectoryNotFoundException ex)
             {
                 Log.Error(ERROR_FORMAT, ex.Message);
-                return new() { Error = DeserializationError.DirectoryNotFound, Output = deserialized };
+                return new() { Error = DeserializationError.DirectoryNotFound, Output = deserialized, Path = string.Empty };
             }
             catch (FileNotFoundException ex)
             {
                 Log.Error(ERROR_FORMAT, ex.Message);
-                return new() { Error = DeserializationError.FileNotFound, Output = deserialized };
+                return new() { Error = DeserializationError.FileNotFound, Output = deserialized, Path = string.Empty };
             }
             catch (NotSupportedException ex)
             {
                 Log.Error(ERROR_FORMAT, ex.Message);
-                return new() { Error = DeserializationError.NotSupported, Output = deserialized };
+                return new() { Error = DeserializationError.NotSupported, Output = deserialized, Path = string.Empty };
             }
             catch (IOException ex)
             {
                 Log.Error(ERROR_FORMAT, ex.Message);
-                return new() { Error = DeserializationError.IO, Output = deserialized };
+                return new() { Error = DeserializationError.IO, Output = deserialized, Path = string.Empty };
             }
             catch (Exception ex)
             {
                 Log.Error(ERROR_FORMAT, ex.Message);
-                return new() { Error = DeserializationError.Serilog, Output = deserialized };
+                return new() { Error = DeserializationError.Serilog, Output = deserialized, Path = string.Empty };
             }
-            return new() { Error = DeserializationError.None, Output = deserialized };
+            return new() { Error = DeserializationError.None, Output = deserialized, Path = string.Empty };
         }
 
         public enum ChangeModelError
@@ -455,8 +548,6 @@ namespace ScapeCore.Core.Serialization
             Log.Debug("Serialization model was succesfully updated.");
             return new() { Error = ChangeModelError.None };
         }
-
-        public static RuntimeTypeModel GetRuntimeClone() => _model;
         public static byte[] ToByteArray(this Stream stream)
         {
             using (stream)

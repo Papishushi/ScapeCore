@@ -2,22 +2,24 @@
 using Microsoft.Xna.Framework;
 using ScapeCore.Core.Batching.Events;
 using ScapeCore.Core.Engine.Components;
+using ScapeCore.Core.SceneManagement;
+using ScapeCore.Targets;
 using Serilog;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace ScapeCore.Core.Engine
 {
-    public abstract class MonoBehaviour : Behaviour
+    public abstract class MonoBehaviour : Behaviour, IEntityComponentModel
     {
         private bool _started = false;
-        public GameObject gameObject;
-        private GameTime _time;
-        public GameTime Time { get => _time; }
+        public GameObject? gameObject { get; set; }
+        private GameTime? _time;
+        public GameTime? Time { get => _time; }
 
         [SuppressMessage("Style", "IDE1006:Naming Styles",
                          Justification = "<In this way it does not match class name and keep it simple and descriptible.>")]
-        public Transform transform { get => gameObject.transform; }
+        public Transform? transform { get => gameObject?.transform; }
 
         ~MonoBehaviour() => OnDestroy();
         public MonoBehaviour() : base(nameof(MonoBehaviour)) => gameObject = new(this);
@@ -29,18 +31,43 @@ namespace ScapeCore.Core.Engine
             gameObject = new(l.ToArray());
         }
 
-        public static T Clone<T>(T monoBehaviour) where T : MonoBehaviour => DeepCopyObjectExtensions.DeepCopy(monoBehaviour);
+        public static T? Clone<T>(T monoBehaviour) where T : MonoBehaviour => DeepCopyObjectExtensions.DeepCopy(monoBehaviour);
 
         protected override void OnCreate()
         {
-            Game.MonoBehaviours.Add(this);
+            if (Game == null)
+            {
+                Log.Warning("{Mo} wasn't correctly created. {LLAM} instance is GCed.", nameof(MonoBehaviour), typeof(LLAM).FullName);
+                return;
+            }
+            if (SceneManager.CurrentScene.TryGetTarget(out var scene))
+                scene.MonoBehaviours.Add(this);
+            else
+            {
+                var i = SceneManager.AddScene(new("Scene", 0));
+                if (i == -1)
+                {
+                    Log.Warning("{Mo} wasn't correctly created. There was a problem adding it to current scene or creating a new one.", nameof(MonoBehaviour));
+                    return;
+                }
+                var currentScene = SceneManager.Get(i);
+                currentScene!.MonoBehaviours.Add(this);
+            }
             Game.OnStart += StartWrapper;
             Game.OnUpdate += UpdateWrapper;
         }
 
         protected override void OnDestroy()
         {
-            Game.MonoBehaviours.Remove(this);
+            if (Game == null)
+            {
+                Log.Warning("{Mo} wasn't correctly created. {LLAM} instance is GCed.", nameof(MonoBehaviour), typeof(LLAM).FullName);
+                return;
+            }
+            if (SceneManager.CurrentScene.TryGetTarget(out var scene))
+                scene.MonoBehaviours.Remove(this);
+            else
+                Log.Warning("{Mo} wasn't correctly destroyed. There was a problem removing it from current scene.", nameof(MonoBehaviour));
             Game.OnUpdate -= UpdateWrapper;
             Game.OnStart -= StartWrapper;
         }
@@ -50,9 +77,7 @@ namespace ScapeCore.Core.Engine
 
         private void StartWrapper(object source, StartBatchEventArgs args)
         {
-            if (!isActive) return;
-            Log.Verbose("{{{@source}}} {@args}", source.GetHashCode(), args.GetInfo());
-            if (_started) return;
+            if (!isActive || _started) return;
             Start();
             _started = true;
         }
@@ -60,7 +85,6 @@ namespace ScapeCore.Core.Engine
         {
             if (!isActive) return;
             _time = args.GetTime();
-            Log.Verbose("{{{@source}}} {@args}", source.GetHashCode(), args.GetInfo());
             Update();
         }
     }

@@ -27,7 +27,6 @@ namespace ScapeCore.Core.Engine.Components
         private void RenderWrapper(object source, RenderBatchEventArgs args)
         {
             _time = args.GetTime();
-            Log.Verbose("{{{@source}}} {@args}", source.GetHashCode(), args.GetInfo());
             Render();
         }
     }

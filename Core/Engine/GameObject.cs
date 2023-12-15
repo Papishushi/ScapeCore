@@ -1,8 +1,9 @@
 ﻿using ScapeCore.Core.Engine.Components;
-using ScapeCore.Targets;
+using ScapeCore.Core.SceneManagement;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Linq;
 
@@ -15,11 +16,12 @@ namespace ScapeCore.Core.Engine
         private readonly List<Behaviour> behaviours;
 
         private static readonly List<string> tagList = new();
-        public static ReadOnlyCollection<string> TagList { get => tagList.AsReadOnly(); }
+        public static ImmutableList<string> TagList { get => tagList.ToImmutableList(); }
 
         public GameObject() : base(nameof(GameObject))
         {
             transform = new();
+            tag = string.Empty;
             behaviours = new()
             {
                 transform
@@ -28,6 +30,7 @@ namespace ScapeCore.Core.Engine
         public GameObject(string name) : base(name)
         {
             transform=new();
+            tag = string.Empty;
             behaviours=new()
             {
                 transform
@@ -36,6 +39,7 @@ namespace ScapeCore.Core.Engine
         public GameObject(params Behaviour[] behaviours) : base(nameof(GameObject))
         {
             transform=new();
+            tag = string.Empty;
             this.behaviours=new()
             {
                 transform
@@ -46,6 +50,7 @@ namespace ScapeCore.Core.Engine
         public GameObject(string name, params Behaviour[] behaviours) : base(name)
         {
             transform=new();
+            tag = string.Empty;
             this.behaviours=new()
             {
                 transform
@@ -62,7 +67,7 @@ namespace ScapeCore.Core.Engine
             if (behaviours == null) throw new System.NullReferenceException($"{nameof(behaviours)} is null");
         }
 
-        public T GetBehaviour<T>() where T : Behaviour
+        public T? GetBehaviour<T>() where T : Behaviour
         {
             try
             {
@@ -111,7 +116,7 @@ namespace ScapeCore.Core.Engine
                 temp.To<MonoBehaviour>().gameObject = this;
             return temp;
         }
-        public T AddBehaviour<T>(T behaviour) where T : Behaviour
+        public T? AddBehaviour<T>(T behaviour) where T : Behaviour
         {
             try
             {
@@ -131,7 +136,7 @@ namespace ScapeCore.Core.Engine
             return behaviour;
         }
 
-        public IEnumerator<T> AddBehaviours<T>(params T[] behaviours) where T : Behaviour
+        public IEnumerator<T>? AddBehaviours<T>(params T[] behaviours) where T : Behaviour
         {
             try
             {
@@ -157,7 +162,7 @@ namespace ScapeCore.Core.Engine
             return l.GetEnumerator();
         }
 
-        public T RemoveBehaviour<T>() where T : Behaviour
+        public T? RemoveBehaviour<T>() where T : Behaviour
         {
             try
             {
@@ -168,7 +173,7 @@ namespace ScapeCore.Core.Engine
                 Log.Error($"Failed to remove behaviour on GameObject {name} {{{Id}}}\t{nRE.Message}");
                 throw;
             }
-            T temp = behaviours.Find(x => x.GetType() == typeof(T)).To<T>();
+            T? temp = behaviours.Find(x => x.GetType() == typeof(T))?.To<T>();
             if (temp == null) return null;
             behaviours.Remove(temp);
             if (typeof(Component).IsAssignableFrom(temp.GetType()))
@@ -178,7 +183,7 @@ namespace ScapeCore.Core.Engine
             return temp;
         }
 
-        public T RemoveBehaviour<T>(T behaviour) where T : Behaviour
+        public T? RemoveBehaviour<T>(T behaviour) where T : Behaviour
         {
             try
             {
@@ -249,21 +254,42 @@ namespace ScapeCore.Core.Engine
             return l.GetEnumerator();
         }
 
-        protected override void OnCreate() => Game.GameObjects.Add(this);
-
-        protected override void OnDestroy() => Game.GameObjects.Remove(this);
-
-        public static GameObject FindGameObjectWithTag(string tag)
+        protected override void OnCreate()
         {
-            var b = LLAM.Instance.TryGetTarget(out LLAM target);
-            if (!b) return null;
-            return target.GameObjects.Find(x => x.tag == tag);
+            if (SceneManager.CurrentScene.TryGetTarget(out var target))
+                target.GameObjects.Add(this);
+            else
+            {
+                var i = SceneManager.AddScene(new Scene("Scene", 0));
+                if (i == -1)
+                {
+                    Log.Warning("{Ga} wasn't correctly created. There was a problem adding it to current scene or to a new one.", nameof(GameObject));
+                    return;
+                }
+                var currentScene = SceneManager.Get(i);
+                currentScene!.GameObjects.Add(this);
+            }
         }
-        public static IEnumerator<GameObject> FindGameObjectsWithTag(string tag)
+
+        protected override void OnDestroy()
         {
-            var b = LLAM.Instance.TryGetTarget(out LLAM target);
+            if (SceneManager.CurrentScene.TryGetTarget(out var target))
+                target.GameObjects.Remove(this);
+            else
+                Log.Warning("{Ga} wasn't correctly destroyed. There was a problem removing it from current scene.", nameof(GameObject));
+        }
+
+        public static GameObject? FindGameObjectWithTag(string tag)
+        {
+            var b = SceneManager.CurrentScene.TryGetTarget(out var target);
             if (!b) return null;
-            return target.GameObjects.FindAll(x => x.tag == tag).GetEnumerator();
+            return target!.GameObjects.Find(x => x.tag == tag);
+        }
+        public static IEnumerator<GameObject>? FindGameObjectsWithTag(string tag)
+        {
+            var b = SceneManager.CurrentScene.TryGetTarget(out var target);
+            if (!b) return null;
+            return target!.GameObjects.FindAll(x => x.tag == tag).GetEnumerator();
         }
 
     }

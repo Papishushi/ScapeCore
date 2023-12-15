@@ -1,9 +1,11 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using ProtoBuf;
 using ScapeCore.Core.Batching.Events;
 using ScapeCore.Core.Batching.Resources;
 using ScapeCore.Core.Engine;
+using ScapeCore.Core.SceneManagement;
 using ScapeCore.Core.Serialization;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
@@ -18,32 +20,62 @@ namespace ScapeCore.Targets
     {
         private long _si, _ui, _ri;
         private GraphicsDeviceManager _graphics;
-        private SpriteBatch _spriteBatch;
+        private SpriteBatch? _spriteBatch;
 
         public GraphicsDeviceManager Graphics { get => _graphics; }
-        public SpriteBatch SpriteBatch { get => _spriteBatch; }
-        public static WeakReference<LLAM> Instance { get; private set; }
+        public SpriteBatch? SpriteBatch { get => _spriteBatch; }
+        public static WeakReference<LLAM?> Instance { get; private set; }
 
-        public readonly List<MonoBehaviour> MonoBehaviours = new();
-        public readonly List<GameObject> GameObjects = new();
+        internal event UpdateBatchEventHandler? OnUpdate;
+        internal event StartBatchEventHandler? OnStart;
+        internal event LoadBatchEventHandler? OnLoad;
+        internal event RenderBatchEventHandler? OnRender;
 
-        internal event UpdateBatchEventHandler OnUpdate;
-        internal event StartBatchEventHandler OnStart;
-        internal event LoadBatchEventHandler OnLoad;
-        internal event RenderBatchEventHandler OnRender;
+        private readonly static Type[] _managers =
+        {
+            typeof(SerializationManager),
+            typeof(ResourceManager),
+            typeof(SceneManager)
+        };
+
+        static LLAM()
+        {
+            Instance ??= new(null);
+        }
 
         public LLAM()
         {
-            Log.Logger = new LoggerConfiguration().MinimumLevel.Debug().WriteTo.Async(wt => wt.Console(theme: AnsiConsoleTheme.Code)).CreateLogger();
+            Log.Logger = new LoggerConfiguration().MinimumLevel.Verbose().WriteTo.Async(wt => wt.Console(theme: AnsiConsoleTheme.Code)).CreateLogger();
+            Log.Information("Constructing Game...");
 
-            if (Instance != null) throw new InvalidOperationException("LLAM singleton instance is not null");
-            else Instance = new(this);
+            Log.Debug("Setting singleton pattern.");
+            if (Instance.TryGetTarget(out var target))
+            {
+                var ex = new InvalidOperationException("There is already a valid LLAM instance set up.");
+                Log.Error(ex.Message);
+                throw ex;
+            }
+            else
+                Instance.SetTarget(this);
 
-            Log.Debug("Constructing LLAM...");
+            Log.Debug("Singleton pattern was set.");
 
-            //Very much important indeed
-            RuntimeHelpers.RunClassConstructor(typeof(SerializationManager).TypeHandle);
-            RuntimeHelpers.RunClassConstructor(typeof(ResourceManager).TypeHandle);
+            try
+            {
+                foreach(var manager in _managers)
+                {
+                    Log.Debug("Initializing {ty} ...", manager);
+                    RuntimeHelpers.RunClassConstructor(manager.TypeHandle);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Managers constructor errror:{ex}\n{exin}", ex.Message, ex.InnerException?.Message);
+                throw;
+            }
+
+            Log.Debug("Managers were correctly initialized.");
 
             _graphics = new(this);
             Content.RootDirectory = "Content";
@@ -57,9 +89,6 @@ namespace ScapeCore.Targets
             static void successLoad(object a, StartBatchEventArgs b) => Log.Information("Load Sucess!");
             OnStart += successLoad;
 
-            // TODO: Add your initialization logic here
-            new Ball();
-
             base.Initialize();
         }
 
@@ -67,7 +96,7 @@ namespace ScapeCore.Targets
         {
             Log.Information("Loading Content...");
             _spriteBatch = new(GraphicsDevice);
-            var args = new LoadBatchEventArgs($"Load process | Patch size {OnLoad?.GetInvocationList().Length}");
+            var args = new LoadBatchEventArgs($"Load process | Patch size {OnLoad?.GetInvocationList().Length ?? 0}");
             OnLoad?.Invoke(this, args);
             OnLoad = null;
         }
@@ -79,9 +108,19 @@ namespace ScapeCore.Targets
                 Exit();
 
             // TODO: Add your update logic here
-            OnStart?.Invoke(this, new($"Start cycle number {_si++} | Patch size {OnStart.GetInvocationList().Length}"));
+            OnStart?.Invoke(this, new(string.Empty));
+            Log.Verbose("{{{@source}}}\t{@args}", GetHashCode(), $"Start cycle number\t{_si++}\t|\tPatch size\t{OnStart?.GetInvocationList().Length ?? 0}");
             OnStart = null;
-            OnUpdate?.Invoke(this, new(gameTime, $"Update cycle number {_ui++} | Patch size {OnUpdate.GetInvocationList().Length}"));
+            OnUpdate?.Invoke(this, new(gameTime, string.Empty));
+            Log.Verbose("{{{@source}}}\t{@args}", GetHashCode(), $"Update cycle number\t{_ui++}\t|\tPatch size\t{OnUpdate?.GetInvocationList().Length ?? 0}");
+
+            foreach (var scene in SceneManager.Scenes)
+            {
+                var count = scene.Invocations.Count;
+                for (var i = 0; i < count; i++) 
+                    if(scene.Invocations.TryDequeue(out var result))
+                        result?.Invoke();
+            }
 
             base.Update(gameTime);
         }
@@ -92,9 +131,10 @@ namespace ScapeCore.Targets
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             //Render Patches
-            _spriteBatch.Begin();
-            OnRender?.Invoke(this, new(gameTime, $"Render cycle number {_ri++} | Patch size {OnRender.GetInvocationList().Length}"));
-            _spriteBatch.End();
+            _spriteBatch!.Begin();
+            OnRender?.Invoke(this, new(gameTime, string.Empty));
+            Log.Verbose("{{{@source}}}\t{@args}", GetHashCode(), $"Render cycle number\t{_ri++}\t|\tPatch size\t{OnRender?.GetInvocationList().Length ?? 0}");
+            _spriteBatch!.End();
 
             base.Draw(gameTime);
         }
@@ -104,6 +144,12 @@ namespace ScapeCore.Targets
             // At application shutdown (results in monitors getting StopMonitoring calls)
             Log.CloseAndFlush();
             base.EndRun();
+        }
+
+        [ProtoAfterDeserialization]
+        private void OnAfterDeserialize()
+        {
+            Instance = new(this);
         }
     }
 }

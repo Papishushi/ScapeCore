@@ -6,7 +6,7 @@ namespace ScapeCore.Core.Engine
     public abstract class Behaviour
     {
         private readonly Guid _id = new();
-        public LLAM Game { get; private set; }
+        public LLAM? Game { get; private set; }
         public string name;
         public bool isActive;
 
@@ -15,7 +15,7 @@ namespace ScapeCore.Core.Engine
         ~Behaviour() => OnDestroy();
         public Behaviour()
         {
-            var b = LLAM.Instance.TryGetTarget(out LLAM target);
+            var b = LLAM.Instance.TryGetTarget(out var target);
             Game =  b ? target : null;
             name = nameof(Behaviour);
             isActive = true;
@@ -23,7 +23,7 @@ namespace ScapeCore.Core.Engine
         }
         protected Behaviour(string name)
         {
-            var b = LLAM.Instance.TryGetTarget(out LLAM target);
+            var b = LLAM.Instance.TryGetTarget(out var target);
             Game =  b ? target : null;
             this.name = name;
             isActive = true;

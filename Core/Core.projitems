@@ -30,16 +30,18 @@
     <Compile Include="$(MSBuildThisFileDirectory)Engine\Components\SpriteRenderer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Engine\Components\Transform.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Engine\GameObject.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Engine\IEntityComponentModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Engine\MonoBehaviour.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Engine\Tilemaps\TileBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Engine\Tilemaps\TileRenderer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)LLAM.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SceneManagement\Scene.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\SerializationManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)Batching\Events\" />
     <Folder Include="$(MSBuildThisFileDirectory)Batching\Resources\" />
-	<Folder Include="$(MSBuildThisFileDirectory)Batching\Tools\" />
+    <Folder Include="$(MSBuildThisFileDirectory)Batching\Tools\" />
     <Folder Include="$(MSBuildThisFileDirectory)Collections\Merkle\" />
   </ItemGroup>
 </Project>
