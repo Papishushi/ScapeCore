@@ -5,6 +5,7 @@ using ScapeCore.Core.Engine.Components;
 using ScapeCore.Core.SceneManagement;
 using ScapeCore.Targets;
 using Serilog;
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
@@ -15,6 +16,7 @@ namespace ScapeCore.Core.Engine
         private bool _started = false;
         public GameObject? gameObject { get; set; }
         private GameTime? _time;
+
         public GameTime? Time { get => _time; }
 
         [SuppressMessage("Style", "IDE1006:Naming Styles",
@@ -61,7 +63,7 @@ namespace ScapeCore.Core.Engine
         {
             if (Game == null)
             {
-                Log.Warning("{Mo} wasn't correctly created. {LLAM} instance is GCed.", nameof(MonoBehaviour), typeof(LLAM).FullName);
+                Log.Warning("{Mo} wasn't correctly destroyed. {LLAM} instance is GCed.", nameof(MonoBehaviour), typeof(LLAM).FullName);
                 return;
             }
             if (SceneManager.CurrentScene.TryGetTarget(out var scene))

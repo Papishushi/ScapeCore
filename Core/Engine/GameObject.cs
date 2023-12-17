@@ -4,7 +4,6 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace ScapeCore.Core.Engine
@@ -256,8 +255,8 @@ namespace ScapeCore.Core.Engine
 
         protected override void OnCreate()
         {
-            if (SceneManager.CurrentScene.TryGetTarget(out var target))
-                target.GameObjects.Add(this);
+            if (SceneManager.CurrentScene.TryGetTarget(out var scene))
+                scene.GameObjects.Add(this);
             else
             {
                 var i = SceneManager.AddScene(new Scene("Scene", 0));
@@ -273,23 +272,23 @@ namespace ScapeCore.Core.Engine
 
         protected override void OnDestroy()
         {
-            if (SceneManager.CurrentScene.TryGetTarget(out var target))
-                target.GameObjects.Remove(this);
+            if (SceneManager.CurrentScene.TryGetTarget(out var scene))
+                scene.GameObjects.Remove(this);
             else
                 Log.Warning("{Ga} wasn't correctly destroyed. There was a problem removing it from current scene.", nameof(GameObject));
         }
 
         public static GameObject? FindGameObjectWithTag(string tag)
         {
-            var b = SceneManager.CurrentScene.TryGetTarget(out var target);
+            var b = SceneManager.CurrentScene.TryGetTarget(out var scene);
             if (!b) return null;
-            return target!.GameObjects.Find(x => x.tag == tag);
+            return scene!.GameObjects.Find(x => x.tag == tag);
         }
         public static IEnumerator<GameObject>? FindGameObjectsWithTag(string tag)
         {
-            var b = SceneManager.CurrentScene.TryGetTarget(out var target);
+            var b = SceneManager.CurrentScene.TryGetTarget(out var scene);
             if (!b) return null;
-            return target!.GameObjects.FindAll(x => x.tag == tag).GetEnumerator();
+            return scene!.GameObjects.FindAll(x => x.tag == tag).GetEnumerator();
         }
 
     }

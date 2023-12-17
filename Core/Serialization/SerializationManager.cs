@@ -12,9 +12,6 @@ using ScapeCore.Core.Engine.Components;
 using ScapeCore.Targets;
 using Serilog;
 using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Collections.ObjectModel;
 using System.IO;
 
 

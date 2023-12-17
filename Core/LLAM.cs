@@ -4,13 +4,11 @@ using Microsoft.Xna.Framework.Input;
 using ProtoBuf;
 using ScapeCore.Core.Batching.Events;
 using ScapeCore.Core.Batching.Resources;
-using ScapeCore.Core.Engine;
 using ScapeCore.Core.SceneManagement;
 using ScapeCore.Core.Serialization;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 using System;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace ScapeCore.Targets
@@ -62,7 +60,7 @@ namespace ScapeCore.Targets
 
             try
             {
-                foreach(var manager in _managers)
+                foreach (var manager in _managers)
                 {
                     Log.Debug("Initializing {ty} ...", manager);
                     RuntimeHelpers.RunClassConstructor(manager.TypeHandle);
@@ -71,7 +69,7 @@ namespace ScapeCore.Targets
             }
             catch (Exception ex)
             {
-                Log.Error("Managers constructor errror:{ex}\n{exin}", ex.Message, ex.InnerException?.Message);
+                Log.Error("Manager constructor errror:{ex}\n{exin}", ex.Message, ex.InnerException?.Message);
                 throw;
             }
 
@@ -113,14 +111,6 @@ namespace ScapeCore.Targets
             OnStart = null;
             OnUpdate?.Invoke(this, new(gameTime, string.Empty));
             Log.Verbose("{{{@source}}}\t{@args}", GetHashCode(), $"Update cycle number\t{_ui++}\t|\tPatch size\t{OnUpdate?.GetInvocationList().Length ?? 0}");
-
-            foreach (var scene in SceneManager.Scenes)
-            {
-                var count = scene.Invocations.Count;
-                for (var i = 0; i < count; i++) 
-                    if(scene.Invocations.TryDequeue(out var result))
-                        result?.Invoke();
-            }
 
             base.Update(gameTime);
         }

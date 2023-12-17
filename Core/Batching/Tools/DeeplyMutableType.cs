@@ -1,6 +1,7 @@
 ﻿using Serilog;
 using System;
 using System.Dynamic;
+using System.Linq;
 using System.Reflection;
 
 namespace ScapeCore.Core.Batching.Tools
@@ -13,68 +14,66 @@ namespace ScapeCore.Core.Batching.Tools
         public DeeplyMutableType() { _value = default; }
         public DeeplyMutableType(object? value) => _value = value;
 
+        protected virtual FieldInfo[]? DynamicFields => _value?.GetType().GetFields();
+        protected static bool LogWarning(string message)
+        {
+            Log.Warning(ERROR_FORMAT, message);
+            return false;
+        }
+        protected static bool IsValueMember(string name) => name.Equals(nameof(Value), StringComparison.OrdinalIgnoreCase) || name.Equals(nameof(_value), StringComparison.OrdinalIgnoreCase);
+
+        protected bool TryFieldOperation(string name, Func<FieldInfo, object?, bool> operation, object? result) =>
+            DynamicFields?.FirstOrDefault(field => name.Equals(field.Name, StringComparison.OrdinalIgnoreCase)) switch
+            {
+                { } field => operation(field, result),
+                _ => false
+            };
+
+        protected bool TryGetValueFromField(FieldInfo field, object? result)
+        {
+            try
+            {
+                result = field.GetValue(_value);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return LogWarning(ex.Message);
+            }
+        }
+        protected bool TrySetValueToField(FieldInfo field, object? value)
+        {
+            try
+            {
+                field.SetValue(_value, value);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return LogWarning(ex.Message);
+            }
+        }
+
         public override bool TryGetMember(GetMemberBinder binder, out object? result)
         {
             result = null;
-            if (_value == null) return false;
-            var name = binder.Name.ToLower();
-            var isValue = name == nameof(Value).ToLower() || name == nameof(_value).ToLower();
-            if (isValue)
+            if (_value == null)
+                return false;
+            if (IsValueMember(binder.Name))
             {
                 result = _value;
                 return true;
             }
-            var isField = false;
-            FieldInfo[] fields = _value.GetType().GetFields();
-            foreach (var field in fields)
-            {
-                if (name == field.Name)
-                {
-                    try
-                    {
-                        field.GetValue(Value);
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Warning(ERROR_FORMAT, ex.Message);
-                        return false;
-                    }
-                    isField = true;
-                    break;
-                }
-            }
-            return isField;
+            return TryFieldOperation(binder.Name, TryGetValueFromField, result);
         }
         public override bool TrySetMember(SetMemberBinder binder, object? value)
         {
-            if (_value == null) return false;
-            string name = binder.Name.ToLower();
-            var isValue = name == nameof(Value).ToLower() || name == nameof(_value).ToLower();
-            if (isValue)
+            if (IsValueMember(binder.Name))
             {
                 _value = value;
                 return true;
             }
-            var isField = false;
-            FieldInfo[] fields = _value.GetType().GetFields();
-            foreach (var field in fields)
-            {
-                if (name  == field.Name)
-                {
-                    try
-                    {
-                        field.SetValue(Value, value);
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Warning(ERROR_FORMAT, ex.Message);
-                        return false;
-                    }
-                    isField = true;
-                    break;
-                }
-            }
-            return isField;
+            return TryFieldOperation(binder.Name, TrySetValueToField, value);
         }
     }
 }

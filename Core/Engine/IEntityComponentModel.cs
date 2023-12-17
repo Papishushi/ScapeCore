@@ -8,4 +8,8 @@ namespace ScapeCore.Core.Engine
          Justification = "<In this way it does not match class name and keep it simple and descriptible.>")]
         public GameObject? gameObject { get; internal set; }
     }
+    internal interface IGameInstantiable
+    {
+
+    }
 }

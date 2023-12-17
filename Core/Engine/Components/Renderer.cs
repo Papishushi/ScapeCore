@@ -2,7 +2,6 @@
 using Microsoft.Xna.Framework.Graphics;
 using ScapeCore.Core.Batching.Events;
 using ScapeCore.Core.Batching.Resources;
-using Serilog;
 using System.Text;
 
 namespace ScapeCore.Core.Engine.Components

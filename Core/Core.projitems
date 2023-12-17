@@ -36,6 +36,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Engine\Tilemaps\TileRenderer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)LLAM.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SceneManagement\Scene.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SceneManagement\SceneManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\SerializationManager.cs" />
   </ItemGroup>
   <ItemGroup>
