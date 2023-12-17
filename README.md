@@ -1,6 +1,7 @@
 # ScapeCore Game Engine
   
 ScapeCore is your go-to free and open-source game engine riding on the MonoGame wave. It's like the Swiss Army knife for game devs – lightweight, modular, and just chill.
+In the future I'm planning on building a GUI Editor also, but for now on I'm mainly focusing on the Core, Backend and API. 
 
 ## Features
 
