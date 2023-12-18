@@ -249,6 +249,56 @@ namespace MyNamespace
     }
 }
 ```
+## Method conventions
+You should always try to split your methods into more concrete, and meaningfull methods. This enhances code maintainability.
+When you are working with inheritance if a local value used by a method could be modified in a override implementation of the method, instead of making the method overrideable, create a virtual property that holds the value and can be overrided, this improves code maintainability and cyclomatic complexity.
+
+```
+public class Foo
+{
+    // Fields representing the foo's properties
+    private double _fooWidth;
+    private double _fooHeight;
+
+    // Public properties for accessing the foo's dimensions
+    public virtual double FooWidth { get => _fooWidth; set => _fooWidth = value; }
+    public virtual double FooHeight { get => _fooHeight; set => _fooHeight = value; }
+
+    // Constructor to initialize the foo
+    public Foo(double width, double height)
+    {
+        _fooWidth = width;
+        _fooHeight = height;
+    }
+
+    // Method to calculate and return the area of the foo
+    public double CalculateFooArea() => _fooWidth * _fooHeight;
+
+    // Method to display information about the foo
+    public void DisplayFooInfo() => Log.Debug($"Foo: Width = {_fooWidth}, Height = {_fooHeight}, Area = {CalculateFooArea()}");
+}
+
+// Inherited class representing a specific type of foo (e.g., Bar)
+public class Bar : Foo
+{
+    // Additional property specific to Bar
+    public double BarDiagonal => Math.Sqrt(FooWidth * FooWidth + FooHeight * FooHeight);
+
+    // Constructor calling the base class constructor
+    public Bar(double width, double height) : base(width, height)
+    {
+    }
+
+    // Override the FooWidth property to enforce constraints
+    public override double FooWidth { get => base.FooWidth; set => base.FooWidth = Math.Max(value, 0); }
+
+    // Override the FooHeight property to enforce constraints
+    public override double FooHeight { get => base.FooHeight; set => base.FooHeight = Math.Max(value, 0); }
+
+    // Override the CalculateFooArea method to provide a specialized implementation
+    public override double CalculateFooArea() => base.CalculateFooArea() * BarDiagonal; // A custom formula for Bar's area
+}
+```
 
 # Useful Links
 [C# Coding Conventions (MSDN)](http://msdn.microsoft.com/en-us/library/ff926074.aspx)
