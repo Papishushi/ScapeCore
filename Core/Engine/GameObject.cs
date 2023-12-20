@@ -42,7 +42,7 @@ namespace ScapeCore.Core.Engine
 {
     public sealed class GameObject : Behaviour
     {
-        public Transform transform;
+        public Transform? transform;
         public string tag;
         private readonly List<Behaviour> behaviours;
 
@@ -304,23 +304,24 @@ namespace ScapeCore.Core.Engine
 
         protected override void OnDestroy()
         {
-            if (SceneManager.CurrentScene.TryGetTarget(out var scene))
-                scene.GameObjects.Remove(this);
-            else
-                Log.Warning("{Ga} wasn't correctly destroyed. There was a problem removing it from current scene.", nameof(GameObject));
+            foreach (var behaviour in behaviours)
+                behaviour.Destroy();
+            transform = null;
         }
 
         public static GameObject? FindGameObjectWithTag(string tag)
         {
             var b = SceneManager.CurrentScene.TryGetTarget(out var scene);
             if (!b) return null;
-            return scene!.GameObjects.Find(x => x.tag == tag);
+            var castedList = scene?.GameObjects as List<GameObject>;
+            return castedList?.Find(x => x.tag == tag);
         }
         public static IEnumerator<GameObject>? FindGameObjectsWithTag(string tag)
         {
             var b = SceneManager.CurrentScene.TryGetTarget(out var scene);
             if (!b) return null;
-            return scene!.GameObjects.FindAll(x => x.tag == tag).GetEnumerator();
+            var castedList = scene?.GameObjects as List<GameObject>;
+            return castedList?.FindAll(x => x.tag == tag).GetEnumerator();
         }
 
     }

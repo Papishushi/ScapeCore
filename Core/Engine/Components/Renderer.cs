@@ -40,8 +40,8 @@ namespace ScapeCore.Core.Engine.Components
 {
     public abstract class Renderer : Component
     {
-        public Texture2D texture;
-        private GameTime _time;
+        public Texture2D? texture;
+        private GameTime? _time;
 
         public GameTime Time { get => _time; }
 
@@ -51,12 +51,18 @@ namespace ScapeCore.Core.Engine.Components
         protected Renderer(StringBuilder name) : base(name.ToString()) => texture = null;
 
 
-        protected override void OnCreate() => Game.OnRender += RenderWrapper;
-        protected override void OnDestroy() => Game.OnRender -= RenderWrapper;
+        protected override void OnCreate() => Game!.OnRender += RenderWrapper;
+        protected override void OnDestroy()
+        {
+            texture = null;
+            _time = null;
+            Game!.OnRender -= RenderWrapper;
+        }
 
         protected abstract void Render();
         private void RenderWrapper(object source, RenderBatchEventArgs args)
         {
+            if (IsDestroyed || !IsActive || (gameObject?.IsDestroyed ?? false) || (!gameObject?.IsActive ?? false)) return;
             _time = args.GetTime();
             Render();
         }

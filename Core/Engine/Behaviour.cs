@@ -38,35 +38,53 @@ namespace ScapeCore.Core.Engine
     public abstract class Behaviour
     {
         private readonly Guid _id = new();
-        public LLAM? Game { get; private set; }
-        public string name;
-        public bool isActive;
+        private LLAM? _game = null;
 
+        private bool _isActive;
+        private bool _isDestroyed;
+
+        public string name;
+
+        protected LLAM? Game { get => _game; }
         public Guid Id { get => _id; }
+        public bool IsActive { get => _isActive; }
+        public bool IsDestroyed { get => _isDestroyed; }
 
         ~Behaviour() => OnDestroy();
         public Behaviour()
         {
             var b = LLAM.Instance.TryGetTarget(out var target);
-            Game =  b ? target : null;
+            _game =  b ? target : null;
             name = nameof(Behaviour);
-            isActive = true;
+            _isActive = true;
+            _isDestroyed = false;
             OnCreate();
         }
         protected Behaviour(string name)
         {
             var b = LLAM.Instance.TryGetTarget(out var target);
-            Game =  b ? target : null;
+            _game =  b ? target : null;
             this.name = name;
-            isActive = true;
+            _isActive = true;
+            _isDestroyed = false;
             OnCreate();
         }
         public T To<T>() where T : Behaviour => (T)this;
+
+        public void SetActive(bool isActive) => _isActive = isActive;
 
         public override string ToString() => name;
 
         protected abstract void OnCreate();
         protected abstract void OnDestroy();
+
+        public void Destroy()
+        {
+            _isActive = false;
+            OnDestroy();
+            _game = null;
+            _isDestroyed = true;
+        }
 
     }
 }

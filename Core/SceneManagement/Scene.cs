@@ -7,27 +7,9 @@
  *  ▀▀▀▀ ·▀▀▀  ▀  ▀ .▀    ▀▀▀     ·▀▀▀  ▀█▄▀▪.▀  ▀ ▀▀▀ 
  * https://github.com/Papishushi/ScapeCore
  * 
- * MIT License
- *
  * Copyright (c) 2023 Daniel Molinero Lucas
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
  * 
  * Scene.cs
  * Represents an environment containing a collection of active behaviours, exposes
@@ -39,25 +21,35 @@ using ScapeCore.Core.Batching.Tools;
 using ScapeCore.Core.Engine;
 using Serilog;
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace ScapeCore.Core.SceneManagement
 {
-    public class Scene
+    public class Scene : IDisposable
     {
         public string name = "Scene";
         public int sceneIndex = 0;
+        private bool disposedValue;
+        private readonly ConcurrentDictionary<Type, ObjectPool> _typePools = new();
 
-        public readonly List<MonoBehaviour> MonoBehaviours = new();
-        public readonly List<GameObject> GameObjects = new();
+        private readonly List<MonoBehaviour> _monoBehaviours = new();
+        private readonly List<GameObject> _gameObjects = new();
 
-        private readonly ConcurrentQueue<Func<DeeplyMutableType, bool>> _invocations = new();
+        public IList MonoBehaviours { get => ArrayList.Synchronized(_monoBehaviours); }
+        public IList GameObjects { get => ArrayList.Synchronized(_gameObjects); }
+
+        private readonly ConcurrentQueue<Func<DeeplyMutableType, bool>> _objectGenerators = new();
         private readonly ConcurrentStack<TaskCompletionSource<DeeplyMutableType>> _instantiationCompletionSources = new();
 
-        public Scene() => Task.Run(InstantiateInvocations);
+        private readonly Task _instantiateInvocations;
+        private readonly CancellationTokenSource _cancellationTokenSource = new();
 
+        public Scene() => _instantiateInvocations = Task.Run(InstantiateInvocations);
         public Scene(int sceneIndex) : this() => this.sceneIndex = sceneIndex;
         public Scene(string name) : this() => this.name = name;
         public Scene(string name, int sceneIndex) : this()
@@ -68,11 +60,12 @@ namespace ScapeCore.Core.SceneManagement
 
         private void InstantiateInvocations()
         {
-            while (true)
-                if (!_invocations.IsEmpty && _invocations.TryDequeue(out var invocation))
+            do
+            {
+                if (!_objectGenerators.IsEmpty && _objectGenerators.TryDequeue(out var generator))
                 {
                     DeeplyMutableType deeplyMutable = new();
-                    var b = invocation?.Invoke(deeplyMutable);
+                    var b = generator?.Invoke(deeplyMutable);
                     if (b ?? false)
                     {
                         if (_instantiationCompletionSources?.TryPop(out var tcs) ?? false)
@@ -82,6 +75,9 @@ namespace ScapeCore.Core.SceneManagement
                                 " Stack wasn't able to pop the {tcs} for the current instantiation, but item was correctly instantiated.", name, typeof(TaskCompletionSource<DeeplyMutableType>));
                     }
                 }
+            }
+            while (!_cancellationTokenSource.IsCancellationRequested);
+               
         }
 
         public async Task<T?> AddToSceneAsync<T>() where T : MonoBehaviour
@@ -90,8 +86,8 @@ namespace ScapeCore.Core.SceneManagement
             {
                 try
                 {
-                    DeeplyMutable<T> deeplyMutable = new((T?)Activator.CreateInstance(typeof(T)));
-                    value.Value = deeplyMutable.Value;
+                    _typePools.TryAdd(typeof(T), new ObjectPool(() => new DeeplyMutable<T>((T?)Activator.CreateInstance(typeof(T)))));
+                    value.Value = _typePools[typeof(T)].Get.Value;
                 }
                 catch (Exception ex)
                 {
@@ -101,7 +97,7 @@ namespace ScapeCore.Core.SceneManagement
                 return true;
             }
 
-            _invocations.Enqueue(Instantiate);
+            _objectGenerators.Enqueue(Instantiate);
             var tcs = new TaskCompletionSource<DeeplyMutableType>();
             _instantiationCompletionSources.Push(tcs);
             var result = await tcs.Task;
@@ -115,8 +111,8 @@ namespace ScapeCore.Core.SceneManagement
             {
                 try
                 {
-                    DeeplyMutableType deeplyMutable = new(Activator.CreateInstance(type));
-                    value.Value = deeplyMutable.Value;
+                    _typePools.TryAdd(type, new ObjectPool(() => new(Activator.CreateInstance(type))));
+                    value.Value = _typePools[type].Get.Value;
                 }
                 catch (Exception ex)
                 {
@@ -126,7 +122,7 @@ namespace ScapeCore.Core.SceneManagement
                 return true;
             }
 
-            _invocations.Enqueue(Instantiate);
+            _objectGenerators.Enqueue(Instantiate);
             var tcs = new TaskCompletionSource<DeeplyMutableType>();
             _instantiationCompletionSources.Push(tcs);
             var result = await tcs.Task;
@@ -140,8 +136,8 @@ namespace ScapeCore.Core.SceneManagement
             {
                 try
                 {
-                    DeeplyMutable<T> deeplyMutable = new((T?)Activator.CreateInstance(typeof(T)));
-                    value.Value = deeplyMutable.Value;
+                    _typePools.TryAdd(typeof(T), new ObjectPool(() => new DeeplyMutable<T>((T?)Activator.CreateInstance(typeof(T)))));
+                    value.Value = _typePools[typeof(T)].Get.Value;
                 }
                 catch (Exception ex)
                 {
@@ -151,7 +147,7 @@ namespace ScapeCore.Core.SceneManagement
                 return true;
             }
 
-            _invocations.Enqueue(Instantiate);
+            _objectGenerators.Enqueue(Instantiate);
             var tcs = new TaskCompletionSource<DeeplyMutableType>();
             _instantiationCompletionSources.Push(tcs);
             var result = tcs.Task;
@@ -167,8 +163,8 @@ namespace ScapeCore.Core.SceneManagement
             {
                 try
                 {
-                    DeeplyMutableType deeplyMutable = new(Activator.CreateInstance(type));
-                    value.Value = deeplyMutable.Value;
+                    _typePools.TryAdd(type, new ObjectPool(() => new(Activator.CreateInstance(type))));
+                    value.Value = _typePools[type].Get.Value;
                 }
                 catch (Exception ex)
                 {
@@ -178,7 +174,7 @@ namespace ScapeCore.Core.SceneManagement
                 return true;
             }
 
-            _invocations.Enqueue(Instantiate);
+            _objectGenerators.Enqueue(Instantiate);
             var tcs = new TaskCompletionSource<DeeplyMutableType>();
             _instantiationCompletionSources.Push(tcs);
             var result = tcs.Task;
@@ -190,18 +186,23 @@ namespace ScapeCore.Core.SceneManagement
 
         public void RemoveFromScene(MonoBehaviour monoBehaviour)
         {
-            if (MonoBehaviours.Contains(monoBehaviour))
+            if (_monoBehaviours.Contains(monoBehaviour))
             {
-
+                _monoBehaviours.Remove(monoBehaviour);
+                monoBehaviour.Destroy();
+                _typePools[monoBehaviour.GetType()].Return(new(monoBehaviour));
             }
             else
                 Log.Warning("Cant remove a MonoBehaviour that is not contained on the scene.");
         }
         public void RemoveFromScene(GameObject gameObject)
         {
-            if (GameObjects.Contains(gameObject))
+            if (_gameObjects.Contains(gameObject))
             {
-
+                _gameObjects.Remove(gameObject);
+                gameObject.Destroy();
+                if (_typePools.ContainsKey(gameObject.GetType()))
+                    _typePools[gameObject.GetType()].Return(new(gameObject));
             }
             else
                 Log.Warning("Cant remove a GameObject that is not contained on the scene.");
@@ -212,5 +213,44 @@ namespace ScapeCore.Core.SceneManagement
 
         }
 
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    foreach(var typePool in _typePools)
+                        typePool.Value.Dispose();
+                    _typePools.Clear();
+                    _cancellationTokenSource.Cancel();
+                    _instantiateInvocations.Wait();
+                    _instantiateInvocations.Dispose();
+                    _monoBehaviours.Clear();
+                    _gameObjects.Clear();
+                    _objectGenerators.Clear();
+                    foreach(var iCS in _instantiationCompletionSources)
+                        iCS.SetCanceled();
+                    _instantiationCompletionSources.Clear();
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                // TODO: set large fields to null
+                disposedValue=true;
+            }
+        }
+
+        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+        // ~Scene()
+        // {
+        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        //     Dispose(disposing: false);
+        // }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
     }
 }

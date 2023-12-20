@@ -55,7 +55,7 @@ namespace ScapeCore.Core.Engine.Components
 
         protected override void OnDestroy()
         {
-
+            gameObject = null;
         }
     }
 }
