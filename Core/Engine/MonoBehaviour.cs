@@ -12,6 +12,10 @@
  * file 'LICENSE.txt', which is part of this source code package.
  * 
  * MonoBehaviour.cs
+ * MonoBehaviour is an abstract class representing a custom
+ * updateable behaviour in the ScapeCore game engine. It provides
+ * functionality for handling the creation, destruction, start,
+ * and update events of a game object.
  */
 
 using Baksteen.Extensions.DeepCopy;

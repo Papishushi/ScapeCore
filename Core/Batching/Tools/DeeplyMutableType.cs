@@ -12,7 +12,7 @@
  * file 'LICENSE.txt', which is part of this source code package.
  * 
  * DeeplyMutableType.cs
- * Providdes support for deeply mutable types in a more type-safe environment.
+ * Provides support for deeply mutable types in a more type-safe environment.
  * This class substitute the use of object or dynamic in multiple source code
  * files from the core. This class works in conjunction to DeeplyMutable<T>,
  * which implements by inheritance a generic solution to the deeply mutable 
