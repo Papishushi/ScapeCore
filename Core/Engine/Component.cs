@@ -12,15 +12,21 @@
  * file 'LICENSE.txt', which is part of this source code package.
  * 
  * Component.cs
- * Represents a Component, that is a non updateable behaviour.
+ * Represents a non-updateable behaviour.
  */
+
+using ScapeCore.Core.Engine.Components;
 
 namespace ScapeCore.Core.Engine
 {
     public abstract class Component : Behaviour, IEntityComponentModel
     {
         public GameObject? gameObject { get; set; }
+        public Transform? transform { get => gameObject?.transform; }
         public Component() : base(nameof(Component)) { }
         protected Component(string name) : base(name) { }
+
+        protected override void OnCreate() { }
+        protected override void OnDestroy() => gameObject = null;
     }
 }

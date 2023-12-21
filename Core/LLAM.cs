@@ -36,6 +36,7 @@ using Microsoft.Xna.Framework.Input;
 using ProtoBuf;
 using ScapeCore.Core.Batching.Events;
 using ScapeCore.Core.Batching.Resources;
+using ScapeCore.Core.Engine;
 using ScapeCore.Core.SceneManagement;
 using ScapeCore.Core.Serialization;
 using Serilog;
@@ -68,10 +69,7 @@ namespace ScapeCore.Targets
             typeof(SceneManager)
         };
 
-        static LLAM()
-        {
-            Instance ??= new(null);
-        }
+        static LLAM() => Instance ??= new(null);
 
         public LLAM()
         {
@@ -165,13 +163,11 @@ namespace ScapeCore.Targets
         {
             // At application shutdown (results in monitors getting StopMonitoring calls)
             Log.CloseAndFlush();
+            SceneManager.Clear();
             base.EndRun();
         }
 
         [ProtoAfterDeserialization]
-        private void OnAfterDeserialize()
-        {
-            Instance = new(this);
-        }
+        private void OnAfterDeserialize() => Instance = new(this);
     }
 }

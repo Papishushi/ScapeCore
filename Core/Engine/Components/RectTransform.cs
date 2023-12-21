@@ -37,15 +37,5 @@ namespace ScapeCore.Core.Engine.Components
             this.rotation=rotation;
             this.scale=scale;
         }
-
-        protected override void OnCreate()
-        {
-
-        }
-
-        protected override void OnDestroy()
-        {
-
-        }
     }
 }

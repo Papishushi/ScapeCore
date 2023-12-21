@@ -34,16 +34,12 @@ namespace ScapeCore.Core.Engine
     public abstract class MonoBehaviour : Behaviour, IEntityComponentModel
     {
         private bool _started = false;
-        public GameObject? gameObject { get; set; }
         private GameTime? _time;
 
         public GameTime? Time { get => _time; }
-
-        [SuppressMessage("Style", "IDE1006:Naming Styles",
-                         Justification = "<In this way it does not match class name and keep it simple and descriptible.>")]
+        public GameObject? gameObject { get; set; }
         public Transform? transform { get => gameObject?.transform; }
 
-        ~MonoBehaviour() => OnDestroy();
         public MonoBehaviour() : base(nameof(MonoBehaviour)) => gameObject = new(this);
 
         public MonoBehaviour(params Behaviour[] behaviours) : base(nameof(MonoBehaviour))
@@ -96,13 +92,16 @@ namespace ScapeCore.Core.Engine
 
         private void StartWrapper(object source, StartBatchEventArgs args)
         {
-            if (IsDestroyed || !IsActive || _started) return;
+            if (_started) return;
+            if (gameObject == null) return;
+            if (IsDestroyed || !IsActive || gameObject.IsDestroyed || !gameObject.IsActive) return;
             Start();
             _started = true;
         }
         private void UpdateWrapper(object source, UpdateBatchEventArgs args)
         {
-            if (IsDestroyed || !IsActive) return;
+            if (gameObject == null) return;
+            if (IsDestroyed || !IsActive || gameObject.IsDestroyed || !gameObject.IsActive) return;
             _time = args.GetTime();
             Update();
         }

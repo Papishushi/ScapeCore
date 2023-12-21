@@ -15,6 +15,7 @@
  * A typeless collection used for pooling objects and reusing them.
  */
 
+using Serilog;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -25,7 +26,7 @@ namespace ScapeCore.Core.Batching.Tools
     public sealed class ObjectPool : IDisposable
     {
         private readonly ConcurrentBag<DeeplyMutableType> _pooledObjects;
-        private readonly Func<DeeplyMutableType> _objectGenerator;
+        private Func<DeeplyMutableType>? _objectGenerator;
         private bool _disposedValue;
 
         public ObjectPool(Func<DeeplyMutableType> objectGenerator)
@@ -34,11 +35,21 @@ namespace ScapeCore.Core.Batching.Tools
             _objectGenerator = objectGenerator;
         }
 
-        public DeeplyMutableType Get => _pooledObjects.TryTake(out var item) ? item : _objectGenerator();
+        private static DeeplyMutableType GetError()
+        {
+            Log.Warning("Object Pool item generator is null. Try setting up a generator.");
+            return new(null);
+        }
 
+        public void ChangeGenerator(Func<DeeplyMutableType> generator) => _objectGenerator = generator;
+        public DeeplyMutableType Get => _pooledObjects.TryTake(out var item) ? item : _objectGenerator?.Invoke() ?? GetError();
         public bool Contains(DeeplyMutableType item) => _pooledObjects.Contains(item);
-
         public void Return(DeeplyMutableType item) => _pooledObjects.Add(item);
+        public void Clear()
+        {
+            _pooledObjects?.Clear();
+            _objectGenerator = null;
+        }
 
         private void Dispose(bool disposing)
         {
@@ -54,19 +65,9 @@ namespace ScapeCore.Core.Batching.Tools
                     }
                     _pooledObjects.Clear();
                 }
-
-                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-                // TODO: set large fields to null
                 _disposedValue=true;
             }
         }
-
-        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        // ~ObjectPool()
-        // {
-        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        //     Dispose(disposing: false);
-        // }
 
         public void Dispose()
         {

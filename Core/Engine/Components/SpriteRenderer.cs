@@ -35,7 +35,7 @@ namespace ScapeCore.Core.Engine.Components
         }
         public SpriteRenderer(string texture) : base(texture)
         {
-            var size = new Point(this.texture.Width, this.texture.Height);
+            var size = new Point(this.texture?.Width ?? 0, this.texture?.Height ?? 0);
             var center = Point.Zero;
             rtransform = new RectTransform(new(center, size), Vector2.Zero, Vector2.One);
             depth = 0f;
@@ -61,7 +61,7 @@ namespace ScapeCore.Core.Engine.Components
         }
 
         protected override void Render() => Game?.SpriteBatch?.Draw(texture ?? new(Game.GraphicsDevice, texture!.Width, texture!.Height),
-                                                                gameObject?.transform?.position ?? Vector2.Zero,
+                                                                transform?.position ?? Vector2.Zero,
                                                                 rtransform?.rectangle ?? new Rectangle(Point.Zero, new(100, 100)),
                                                                 Color.White,
                                                                 rtransform?.rotation.X ?? 0f,

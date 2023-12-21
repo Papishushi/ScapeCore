@@ -70,5 +70,11 @@ namespace ScapeCore.Core.SceneManagement
             _scenesCount--;
             return sceneId;
         }
+        public static void Clear()
+        {
+            foreach (var scene in _scenes)
+                scene.Value.Dispose();
+            _scenes.Clear();
+        }
     }
 }
