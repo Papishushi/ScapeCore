@@ -19,18 +19,29 @@ using Microsoft.Xna.Framework;
 
 namespace ScapeCore.Core.Engine.Components
 {
-    public sealed class Transform : Component
+    public class Transform : Component
     {
-        public Vector2 position = Vector2.Zero;
-        public Vector2 rotation = Vector2.Zero;
-        public Vector2 scale = Vector2.Zero;
+        public Vector2 _position = Vector2.Zero;
+        public Vector2 _rotation = Vector2.Zero;
+        public Vector2 _scale = Vector2.One;
 
-        public Transform() : base() { }
-        public Transform(Vector2 position, Vector2 rotation, Vector2 scale) : base()
+        public Vector2 Position { get => (gameObject?.parent?.transform?.Position ?? Vector2.Zero) + _position; set => _position = value; }
+        public Vector2 Rotation { get => (gameObject?.parent?.transform?.Rotation ?? Vector2.Zero) + _rotation; set => _rotation = value; }
+        public Vector2 Scale { get => (gameObject?.parent?.transform?.Scale ?? Vector2.One) * _scale; set => _scale = value; }
+
+        public Transform() : base(nameof(Transform)) { }
+        public Transform(string name) : base(name) { }
+        public Transform(Vector2 position, Vector2 rotation, Vector2 scale) : base(nameof(Transform))
         {
-            this.position=position;
-            this.rotation=rotation;
-            this.scale=scale;
+            _position = position;
+            _rotation = rotation;
+            _scale = scale;
+        }
+        public Transform(string name, Vector2 position, Vector2 rotation, Vector2 scale) : base(name)
+        {
+            _position = position;
+            _rotation = rotation;
+            _scale = scale;
         }
     }
 }

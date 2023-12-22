@@ -37,36 +37,36 @@ namespace ScapeCore.Core.Engine.Components
         {
             var size = new Point(this.texture?.Width ?? 0, this.texture?.Height ?? 0);
             var center = Point.Zero;
-            rtransform = new RectTransform(new(center, size), Vector2.Zero, Vector2.One);
+            rtransform = new RectTransform(size, center, Vector2.Zero, Vector2.Zero, Vector2.One);
             depth = 0f;
         }
         public SpriteRenderer(Texture2D texture) : base(texture)
         {
             var size = new Point(texture.Width, texture.Height);
             var center = Point.Zero;
-            rtransform = new RectTransform(new(center, size), Vector2.Zero, Vector2.One);
+            rtransform = new RectTransform(size, center, Vector2.Zero, Vector2.Zero, Vector2.One);
             depth = 0f;
         }
         public SpriteRenderer(string texture, RectTransform rtransform, SpriteEffects spriteEffects, float depth) : base(texture)
         {
-            this.rtransform=rtransform;
-            this.spriteEffects=spriteEffects;
-            this.depth=depth;
+            this.rtransform = rtransform;
+            this.spriteEffects = spriteEffects;
+            this.depth = depth;
         }
         public SpriteRenderer(Texture2D texture, RectTransform rtransform, SpriteEffects spriteEffects, float depth) : base(texture)
         {
-            this.rtransform=rtransform;
-            this.spriteEffects=spriteEffects;
-            this.depth=depth;
+            this.rtransform = rtransform;
+            this.spriteEffects = spriteEffects;
+            this.depth = depth;
         }
 
         protected override void Render() => Game?.SpriteBatch?.Draw(texture ?? new(Game.GraphicsDevice, texture!.Width, texture!.Height),
-                                                                transform?.position ?? Vector2.Zero,
-                                                                rtransform?.rectangle ?? new Rectangle(Point.Zero, new(100, 100)),
+                                                                transform?.Position ?? Vector2.Zero,
+                                                                rtransform?.Rectangle ?? new Rectangle(Point.Zero, new(100, 100)),
                                                                 Color.White,
-                                                                rtransform?.rotation.X ?? 0f,
-                                                                new(texture!.Width / 2, texture!.Height / 2),
-                                                                rtransform?.scale ?? Vector2.One,
+                                                                rtransform?.Rotation.X ?? 0f,
+                                                                new Vector2(texture!.Width * 0.5f, texture!.Height * 0.5f),
+                                                                rtransform?.Scale ?? Vector2.One,
                                                                 spriteEffects,
                                                                 depth);
     }

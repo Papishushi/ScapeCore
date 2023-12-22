@@ -35,6 +35,9 @@ namespace ScapeCore.Core.Engine
         private static readonly List<string> tagList = new();
         public static ImmutableList<string> TagList { get => tagList.ToImmutableList(); }
 
+        public GameObject? parent = null;
+        public readonly List<GameObject> children = new();
+
         public GameObject() : base(nameof(GameObject))
         {
             transform = new();
@@ -53,25 +56,13 @@ namespace ScapeCore.Core.Engine
                 transform
             };
         }
-        public GameObject(params Behaviour[] behaviours) : base(nameof(GameObject))
+        public GameObject(params Behaviour[] behaviours) : this()
         {
-            transform=new();
-            tag = string.Empty;
-            this.behaviours=new()
-            {
-                transform
-            };
             foreach (Behaviour behaviour in behaviours)
                 this.behaviours.Add(behaviour);
         }
-        public GameObject(string name, params Behaviour[] behaviours) : base(name)
+        public GameObject(string name, params Behaviour[] behaviours) : this(name)
         {
-            transform=new();
-            tag = string.Empty;
-            this.behaviours=new()
-            {
-                transform
-            };
             foreach (Behaviour behaviour in behaviours)
                 this.behaviours.Add(behaviour);
         }

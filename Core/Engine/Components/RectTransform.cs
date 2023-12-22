@@ -19,23 +19,18 @@ using Microsoft.Xna.Framework;
 
 namespace ScapeCore.Core.Engine.Components
 {
-    public sealed class RectTransform : Component
+    public sealed class RectTransform : Transform
     {
-        public Rectangle rectangle = new Rectangle();
-        public Vector2 rotation = Vector2.Zero;
-        public Vector2 scale = Vector2.One;
+        private Point _size = Point.Zero;
+        private Point _center = Point.Zero;
 
-        public RectTransform()
+        public Rectangle Rectangle { get => new(_center, _size); }
+
+        public RectTransform() : base(nameof(RectTransform)) { }
+        public RectTransform(Point size, Point center, Vector2 position, Vector2 rotation, Vector2 scale) : base(nameof(RectTransform), position, rotation, scale)
         {
-            rectangle = new(Point.Zero, Point.Zero);
-            rotation = Vector2.Zero;
-            scale = Vector2.One;
-        }
-        public RectTransform(Rectangle rectangle, Vector2 rotation, Vector2 scale)
-        {
-            this.rectangle=rectangle;
-            this.rotation=rotation;
-            this.scale=scale;
+            _size = size;
+            _center = center;
         }
     }
 }

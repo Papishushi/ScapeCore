@@ -26,23 +26,23 @@ namespace ScapeCore.Core.Engine.Tilemaps
         public SpriteEffects spriteEffects;
         public float depth;
 
-        public TileRenderer() : base((Texture2D)null)
+        public TileRenderer() : base()
         {
             rtransform = new();
             depth = 0f;
         }
         public TileRenderer(string texture) : base(texture)
         {
-            var size = new Point(this.texture.Width, this.texture.Height);
+            var size = new Point(this.texture?.Width ?? 0, this.texture?.Height ?? 0);
             var center = Point.Zero;
-            rtransform = new RectTransform(new(center, size), Vector2.Zero, Vector2.One);
+            rtransform = new RectTransform(size, center, Vector2.Zero, Vector2.Zero, Vector2.One);
             depth = 0f;
         }
         public TileRenderer(Texture2D texture) : base(texture)
         {
             var size = new Point(texture.Width, texture.Height);
             var center = Point.Zero;
-            rtransform = new RectTransform(new(center, size), Vector2.Zero, Vector2.One);
+            rtransform = new RectTransform(size, center, Vector2.Zero, Vector2.Zero, Vector2.One);
             depth = 0f;
         }
         public TileRenderer(string texture, RectTransform rtransform, SpriteEffects spriteEffects, float depth) : base(texture)
@@ -58,13 +58,13 @@ namespace ScapeCore.Core.Engine.Tilemaps
             this.depth=depth;
         }
 
-        protected override void Render() => Game.SpriteBatch.Draw(texture,
-                                                                gameObject.transform.position,
-                                                                rtransform.rectangle,
+        protected override void Render() => Game?.SpriteBatch?.Draw(texture,
+                                                                gameObject?.transform?.Position ?? Vector2.Zero,
+                                                                rtransform.Rectangle,
                                                                 Color.White,
-                                                                rtransform.rotation.X,
-                                                                new(texture.Width / 2, texture.Height / 2),
-                                                                rtransform.scale,
+                                                                rtransform.Rotation.X,
+                                                                new Vector2((texture?.Width ?? 0) * 0.5f, (texture?.Height ?? 0) * 0.5f),
+                                                                rtransform.Scale,
                                                                 spriteEffects,
                                                                 depth);
     }
