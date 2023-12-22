@@ -31,6 +31,7 @@ using ScapeCore.Targets;
 using Serilog;
 using System;
 using System.IO;
+using System.Reflection.PortableExecutable;
 
 
 namespace ScapeCore.Core.Serialization
@@ -203,6 +204,7 @@ namespace ScapeCore.Core.Serialization
             }
         }
 
+        #region Serialization
         public enum SerializationError
         {
             None,
@@ -255,6 +257,82 @@ namespace ScapeCore.Core.Serialization
                     }
                 }
                 Log.Debug("Serialized {l} bytes from {type} into {path}", size, typeof(T), path);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Log.Error(ERROR_FORMAT, path, ex.Message);
+                return new() { Error = SerializationError.UnauthorizedAccess, Data = data, Size = size, Path = path, Compressed = compress };
+            }
+            catch (ArgumentNullException ex)
+            {
+                Log.Error(ERROR_FORMAT, path, ex.Message);
+                return new() { Error = SerializationError.NullPath, Data = data, Size = size, Path = path, Compressed = compress };
+            }
+            catch (ArgumentException ex)
+            {
+                Log.Error(ERROR_FORMAT, path, ex.Message);
+                return new() { Error = SerializationError.PathNotValid, Data = data, Size = size, Path = path, Compressed = compress };
+            }
+            catch (PathTooLongException ex)
+            {
+                Log.Error(ERROR_FORMAT, path, ex.Message);
+                return new() { Error = SerializationError.PathTooLong, Data = data, Size = size, Path = path, Compressed = compress };
+            }
+            catch (DirectoryNotFoundException ex)
+            {
+                Log.Error(ERROR_FORMAT, path, ex.Message);
+                return new() { Error = SerializationError.DirectoryNotFound, Data = data, Size = size, Path = path, Compressed = compress };
+            }
+            catch (NotSupportedException ex)
+            {
+                Log.Error(ERROR_FORMAT, path, ex.Message);
+                return new() { Error = SerializationError.NotSupported, Data = data, Size = size, Path = path, Compressed = compress };
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ERROR_FORMAT, path, ex.Message);
+                return new() { Error = SerializationError.Serilog, Data = data, Size = size, Path = path, Compressed = compress };
+            }
+            return new() { Error = SerializationError.None, Data = data, Size = size, Path = path, Compressed = compress };
+        }
+        public static SerializationOutput Serialize(Type type, object? obj, string path, bool compress = false, object? userState = null)
+        {
+            long size = 0;
+            byte[]? data = null;
+            string fileName = compress ? type.Name + PROTOBUFER_COMPRESSED_BINARY : type.Name + PROTOBUFFER_BINARY;
+            const string ERROR_FORMAT = "Serialization to path {path} failed: {ex}";
+
+            if (_model == null)
+            {
+                Log.Warning(ERROR_FORMAT, path, "Serialization model is null.");
+                return new() { Error = SerializationError.ModelNull, Data = data, Size = size, Path = path, Compressed = compress };
+            }
+            if (!_model.CanSerialize(type))
+            {
+                Log.Error(ERROR_FORMAT, $"Type {type.FullName} can't be serialized.");
+                return new() { Error = SerializationError.NotSerializable, Data = default, Size = size, Path = string.Empty, Compressed = compress };
+            }
+            if (string.IsNullOrEmpty(path)) return new() { Error = SerializationError.NullPath, Data = default, Size = size, Path = path, Compressed = compress };
+            try
+            {
+                using (var writer = File.Open(Path.Combine(path, fileName), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read))
+                {
+                    if (compress)
+                    {
+                        using (var gzip = new GZipStream(writer, CompressionMode.Compress, false))
+                        using (var bs = new BufferedStream(gzip, GZIP_BUFFER_SIZE))
+                        {
+                            size = _model.Serialize(bs, obj, userState);
+                            data = bs.ToByteArray();
+                        }
+                    }
+                    else
+                    {
+                        size = _model.Serialize(writer, obj, userState);
+                        data = writer.ToByteArray();
+                    }
+                }
+                Log.Debug("Serialized {l} bytes from {type} into {path}", size, type, path);
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -365,6 +443,81 @@ namespace ScapeCore.Core.Serialization
             }
             return new() { Error = SerializationError.None, Data = data, Size = size, Path = string.Empty, Compressed = compress };
         }
+        public static SerializationOutput Serialize(Type type, object? obj, bool compress = false, object? userState = null)
+        {
+            long size = 0;
+            byte[] data = new byte[GZIP_BUFFER_SIZE]; ;
+            const string ERROR_FORMAT = "Serialization failed: {ex}";
+
+            if (_model == null)
+            {
+                Log.Warning(ERROR_FORMAT, "Serialization model is null.");
+                return new() { Error = SerializationError.ModelNull, Data = data, Size = size, Path = string.Empty, Compressed = compress };
+            }
+            if (!_model.CanSerialize(type))
+            {
+                Log.Error(ERROR_FORMAT, $"Type {type.FullName} can't be serialized.");
+                return new() { Error = SerializationError.NotSerializable, Data = default, Size = size, Path = string.Empty, Compressed = compress };
+            }
+            try
+            {
+                using (MemoryStream ms = new MemoryStream(data, true))
+                {
+                    if (compress)
+                    {
+                        using (var gzip = new GZipStream(ms, CompressionMode.Compress, false))
+                        using (var bs = new BufferedStream(gzip, GZIP_BUFFER_SIZE))
+                        {
+                            size = _model.Serialize(bs, obj, userState);
+                        }
+                    }
+                    else
+                    {
+                        size = _model.Serialize(ms, obj, userState);
+                    }
+                }
+                Log.Debug("Serialized {l} bytes from {type}", size, type);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Log.Error(ERROR_FORMAT, ex.Message);
+                return new() { Error = SerializationError.UnauthorizedAccess, Data = data, Size = size, Path = string.Empty, Compressed = compress };
+            }
+            catch (ArgumentNullException ex)
+            {
+                Log.Error(ERROR_FORMAT, ex.Message);
+                return new() { Error = SerializationError.NullPath, Data = data, Size = size, Path = string.Empty, Compressed = compress };
+            }
+            catch (ArgumentException ex)
+            {
+                Log.Error(ERROR_FORMAT, ex.Message);
+                return new() { Error = SerializationError.PathNotValid, Data = data, Size = size, Path = string.Empty, Compressed = compress };
+            }
+            catch (PathTooLongException ex)
+            {
+                Log.Error(ERROR_FORMAT, ex.Message);
+                return new() { Error = SerializationError.PathTooLong, Data = data, Size = size, Path = string.Empty, Compressed = compress };
+            }
+            catch (DirectoryNotFoundException ex)
+            {
+                Log.Error(ERROR_FORMAT, ex.Message);
+                return new() { Error = SerializationError.DirectoryNotFound, Data = data, Size = size, Path = string.Empty, Compressed = compress };
+            }
+            catch (NotSupportedException ex)
+            {
+                Log.Error(ERROR_FORMAT, ex.Message);
+                return new() { Error = SerializationError.NotSupported, Data = data, Size = size, Path = string.Empty, Compressed = compress };
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ERROR_FORMAT, ex.Message);
+                return new() { Error = SerializationError.Serilog, Data = data, Size = size, Path = string.Empty, Compressed = compress };
+            }
+            return new() { Error = SerializationError.None, Data = data, Size = size, Path = string.Empty, Compressed = compress };
+        }
+        #endregion Serialization
+
+        #region Deserialization
         public enum DeserializationError
         {
             None,
@@ -381,6 +534,7 @@ namespace ScapeCore.Core.Serialization
             ModelNull
         }
         public readonly record struct DeserializationOutput<T>(DeserializationError Error, T? Output, string Path, bool Decompressed);
+        public readonly record struct DeserializationOutput(Type Type, DeserializationError Error, object? Output, string Path, bool Decompressed);
         public static DeserializationOutput<T> Deserialize<T>(string path, T? obj = default, bool decompress = false, object? userState = null)
         {
             T? deserialized = default;
@@ -463,7 +617,88 @@ namespace ScapeCore.Core.Serialization
             }
             return new() { Error = DeserializationError.None, Output = deserialized, Path = path };
         }
+        public static DeserializationOutput Deserialize(Type type, string path, object? obj = default, bool decompress = false, object? userState = null)
+        {
+            object? deserialized = default;
+            string fileName = decompress ? type.Name+PROTOBUFER_COMPRESSED_BINARY : type.Name+PROTOBUFFER_BINARY;
+            const string ERROR_FORMAT = "Deserialization to path {path} failed: {ex}";
 
+            if (_model == null)
+            {
+                Log.Warning(ERROR_FORMAT, path, "Serialization model is null.");
+                return new() { Type = type, Error = DeserializationError.ModelNull, Output = deserialized, Path = path };
+            }
+            if (!_model.CanSerialize(type))
+            {
+                Log.Error(ERROR_FORMAT, $"Type {type.FullName} can't be deserialized.");
+                return new() { Type = type, Error = DeserializationError.NotSerializable, Output = deserialized, Path = path };
+            }
+            if (string.IsNullOrEmpty(path)) return new() { Type = type, Error = DeserializationError.NullPath, Output = deserialized, Path = path };
+            try
+            {
+                using (var reader = File.OpenRead(Path.Combine(path, fileName)))
+                {
+                    if (decompress)
+                    {
+                        using (var gzip = new GZipStream(reader, CompressionMode.Decompress, false))
+                        using (var bs = new BufferedStream(gzip, GZIP_BUFFER_SIZE))
+                        {
+                            deserialized = _model.Deserialize(type, bs, obj, userState);
+                        }
+                    }
+                    else
+                        deserialized = _model.Deserialize(type, reader, obj, userState);
+                }
+
+                Log.Debug("Deserialized type {t} from {path}.", type.Name, path);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Log.Error(ERROR_FORMAT, path, ex.Message);
+                return new() { Type = type, Error = DeserializationError.UnauthorizedAccess, Output = deserialized, Path = path };
+            }
+            catch (ArgumentNullException ex)
+            {
+                Log.Error(ERROR_FORMAT, path, ex.Message);
+                return new() { Type = type, Error = DeserializationError.NullPath, Output = deserialized, Path = path };
+            }
+            catch (ArgumentException ex)
+            {
+                Log.Error(ERROR_FORMAT, path, ex.Message);
+                return new() { Type = type, Error = DeserializationError.PathNotValid, Output = deserialized, Path = path };
+            }
+            catch (PathTooLongException ex)
+            {
+                Log.Error(ERROR_FORMAT, path, ex.Message);
+                return new() { Type = type, Error = DeserializationError.PathTooLong, Output = deserialized, Path = path };
+            }
+            catch (DirectoryNotFoundException ex)
+            {
+                Log.Error(ERROR_FORMAT, path, ex.Message);
+                return new() { Type = type, Error = DeserializationError.DirectoryNotFound, Output = deserialized, Path = path };
+            }
+            catch (FileNotFoundException ex)
+            {
+                Log.Error(ERROR_FORMAT, path, ex.Message);
+                return new() { Type = type, Error = DeserializationError.FileNotFound, Output = deserialized, Path = path };
+            }
+            catch (NotSupportedException ex)
+            {
+                Log.Error(ERROR_FORMAT, path, ex.Message);
+                return new() { Type = type, Error = DeserializationError.NotSupported, Output = deserialized, Path = path };
+            }
+            catch (IOException ex)
+            {
+                Log.Error(ERROR_FORMAT, path, ex.Message);
+                return new() { Type = type, Error = DeserializationError.IO, Output = deserialized, Path = path };
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ERROR_FORMAT, path, ex.Message);
+                return new() { Type = type, Error = DeserializationError.Serilog, Output = deserialized, Path = path };
+            }
+            return new() { Type = type, Error = DeserializationError.None, Output = deserialized, Path = path };
+        }
         public static DeserializationOutput<T> Deserialize<T>(byte[] serialized, bool decompress = false, object? userState = null)
         {
             T? deserialized = default;
@@ -544,7 +779,99 @@ namespace ScapeCore.Core.Serialization
             }
             return new() { Error = DeserializationError.None, Output = deserialized, Path = string.Empty };
         }
+        public static DeserializationOutput Deserialize(Type type, byte[] serialized, bool decompress = false, object? userState = null)
+        {
+            object? deserialized = default;
+            const string ERROR_FORMAT = "Deserialization failed: {ex}";
 
+            if (_model == null)
+            {
+                Log.Warning(ERROR_FORMAT, "Serialization model is null.");
+                return new() { Type = type, Error = DeserializationError.ModelNull, Output = deserialized, Path = string.Empty };
+            }
+            if (!_model.CanSerialize(type))
+            {
+                Log.Error(ERROR_FORMAT, $"Type {type.FullName} can't be deserialized.");
+                return new() { Type = type, Error = DeserializationError.NotSerializable, Output = deserialized, Path = string.Empty };
+            }
+            try
+            {
+                using (var ms = new MemoryStream(serialized, false))
+                {
+                    if (decompress)
+                    {
+                        using (var gzip = new GZipStream(ms, CompressionMode.Decompress, false))
+                        using (var bs = new BufferedStream(gzip, GZIP_BUFFER_SIZE))
+                        {
+                            deserialized = _model.Deserialize(type, bs, userState: userState);
+                        }
+                    }
+                    else
+                        deserialized = _model.Deserialize(type, ms, userState: userState);
+                }
+
+                Log.Debug("Deserialized type {t}.", type.Name);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Log.Error(ERROR_FORMAT, ex.Message);
+                return new() {Type = type,
+                    Error = DeserializationError.UnauthorizedAccess, Output = deserialized, Path = string.Empty };
+            }
+            catch (ArgumentNullException ex)
+            {
+                Log.Error(ERROR_FORMAT, ex.Message);
+                return new() {Type = type,
+                    Error = DeserializationError.NullPath, Output = deserialized, Path = string.Empty };
+            }
+            catch (ArgumentException ex)
+            {
+                Log.Error(ERROR_FORMAT, ex.Message);
+                return new() {Type = type,
+                    Error = DeserializationError.PathNotValid, Output = deserialized, Path = string.Empty };
+            }
+            catch (PathTooLongException ex)
+            {
+                Log.Error(ERROR_FORMAT, ex.Message);
+                return new() {Type = type,
+                    Error = DeserializationError.PathTooLong, Output = deserialized, Path = string.Empty };
+            }
+            catch (DirectoryNotFoundException ex)
+            {
+                Log.Error(ERROR_FORMAT, ex.Message);
+                return new() {Type = type,
+                    Error = DeserializationError.DirectoryNotFound, Output = deserialized, Path = string.Empty };
+            }
+            catch (FileNotFoundException ex)
+            {
+                Log.Error(ERROR_FORMAT, ex.Message);
+                return new() {Type = type,
+                    Error = DeserializationError.FileNotFound, Output = deserialized, Path = string.Empty };
+            }
+            catch (NotSupportedException ex)
+            {
+                Log.Error(ERROR_FORMAT, ex.Message);
+                return new() {Type = type,
+                    Error = DeserializationError.NotSupported, Output = deserialized, Path = string.Empty };
+            }
+            catch (IOException ex)
+            {
+                Log.Error(ERROR_FORMAT, ex.Message);
+                return new() {Type = type,
+                    Error = DeserializationError.IO, Output = deserialized, Path = string.Empty };
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ERROR_FORMAT, ex.Message);
+                return new() {Type = type,
+                    Error = DeserializationError.Serilog, Output = deserialized, Path = string.Empty };
+            }
+            return new() {Type = type,
+                Error = DeserializationError.None, Output = deserialized, Path = string.Empty };
+        }
+        #endregion Deserialization
+
+        #region Change Serialization Model
         public enum ChangeModelError
         {
             None,
@@ -563,7 +890,9 @@ namespace ScapeCore.Core.Serialization
             Log.Debug("Serialization model was succesfully updated.");
             return new() { Error = ChangeModelError.None };
         }
-        public static byte[] ToByteArray(this Stream stream)
+        #endregion Change Serialization Model
+
+        private static byte[] ToByteArray(this Stream stream)
         {
             using (stream)
             using (MemoryStream memStream = new MemoryStream())
