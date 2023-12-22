@@ -78,8 +78,6 @@ namespace ScapeCore.Core.Batching.Tools
         public override bool TryGetMember(GetMemberBinder binder, out object? result)
         {
             result = null;
-            if (_value == null)
-                return false;
             if (IsValueMember(binder.Name))
             {
                 result = _value;
