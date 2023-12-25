@@ -14,10 +14,13 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Set up MonoGame
-      uses: mono/monogame-action@v1
-      with:
-        target: "Linux"
+    - name: Install MonoGame
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y mono-devel mono-dmcs
+        wget -q https://github.com/MonoGame/MonoGame/releases/download/v3.8.0/MonoGame.zip
+        unzip -q MonoGame.zip
+        export PATH=$PATH:$(pwd)/MonoGameSDK/Content/Tools
 
     - name: Build MonoGame project
       run: |
