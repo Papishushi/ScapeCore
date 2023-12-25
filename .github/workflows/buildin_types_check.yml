@@ -16,5 +16,5 @@ jobs:
 
     - name: Run Script
       run: |
-        chmod +x ./master/Core/BuildinTypesUpdater.sh
-        ./master/Core/BuildinTypesUpdater.sh
+        chmod +x ./Core/BuildinTypesUpdater.sh
+        ./Core/BuildinTypesUpdater.sh
