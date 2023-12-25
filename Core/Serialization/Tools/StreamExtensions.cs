@@ -11,22 +11,25 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  * 
- * DeeplyMutable.cs
- * DeeplyMutable<T> is a generic class that extends DeeplyMutableType
- * and provides type-safe access to deeply mutable types.
+ * StreamExtensions.cs
+ * Provides utilities working with streams.
  */
 
-using System.Reflection;
+using System.IO;
 
-namespace ScapeCore.Core.Batching.Tools
+
+namespace ScapeCore.Core.Serialization.Tools
 {
-    public sealed class DeeplyMutable<T> : DeeplyMutableType
+    public static class StreamExtensions
     {
-        public new T? Value { get => _value; set => _value = value; }
-        public DeeplyMutable() : base() { }
-        public DeeplyMutable(T? value) : base(value) { }
-        public DeeplyMutable(DeeplyMutableType deeplyMutableType) => _value = deeplyMutableType.Value;
-
-        protected override FieldInfo[]? DynamicFields => typeof(T).GetFields();
+        public static byte[] ToByteArray(this Stream stream)
+        {
+            using (stream)
+            using (var memStream = new MemoryStream())
+            {
+                stream.CopyTo(memStream);
+                return memStream.ToArray();
+            }
+        }
     }
 }

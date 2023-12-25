@@ -26,7 +26,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace ScapeCore.Core.SceneManagement
 {
@@ -77,7 +76,7 @@ namespace ScapeCore.Core.SceneManagement
                 }
             }
             while (!_cancellationTokenSource.IsCancellationRequested);
-               
+
         }
 
         public async Task<T?> AddToSceneAsync<T>() where T : MonoBehaviour
@@ -220,7 +219,7 @@ namespace ScapeCore.Core.SceneManagement
             {
                 if (disposing)
                 {
-                    foreach(var typePool in _typePools)
+                    foreach (var typePool in _typePools)
                         typePool.Value.Dispose();
                     _typePools.Clear();
                     _cancellationTokenSource.Cancel();
@@ -229,7 +228,7 @@ namespace ScapeCore.Core.SceneManagement
                     _monoBehaviours.Clear();
                     _gameObjects.Clear();
                     _objectGenerators.Clear();
-                    foreach(var iCS in _instantiationCompletionSources)
+                    foreach (var iCS in _instantiationCompletionSources)
                         iCS.SetCanceled();
                     _instantiationCompletionSources.Clear();
                 }

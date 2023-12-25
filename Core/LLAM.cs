@@ -36,7 +36,6 @@ using Microsoft.Xna.Framework.Input;
 using ProtoBuf;
 using ScapeCore.Core.Batching.Events;
 using ScapeCore.Core.Batching.Resources;
-using ScapeCore.Core.Engine;
 using ScapeCore.Core.SceneManagement;
 using ScapeCore.Core.Serialization;
 using Serilog;

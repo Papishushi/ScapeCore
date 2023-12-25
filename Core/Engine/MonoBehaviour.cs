@@ -25,8 +25,6 @@ using ScapeCore.Core.Engine.Components;
 using ScapeCore.Core.SceneManagement;
 using ScapeCore.Targets;
 using Serilog;
-using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace ScapeCore.Core.Engine

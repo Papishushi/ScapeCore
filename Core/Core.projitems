@@ -38,11 +38,16 @@
     <Compile Include="$(MSBuildThisFileDirectory)LLAM.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SceneManagement\Scene.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SceneManagement\SceneManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\RuntimeModelFactory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\ScapeCoreDeserializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\ScapeCoreSerializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\SerializationManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Tools\StreamExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)Batching\Events\" />
     <Folder Include="$(MSBuildThisFileDirectory)Batching\Resources\" />
     <Folder Include="$(MSBuildThisFileDirectory)Collections\Merkle\" />
+    <Folder Include="$(MSBuildThisFileDirectory)Serialization\Tools\" />
   </ItemGroup>
 </Project>
