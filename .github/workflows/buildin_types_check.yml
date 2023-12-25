@@ -25,4 +25,4 @@ jobs:
         git config --global user.name "Papishushi"
         git add .
         git commit -m "Update BuildinTypes.xml via GitHub Actions"
-        git push
+        git pull
