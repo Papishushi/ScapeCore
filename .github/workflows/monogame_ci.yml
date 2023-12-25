@@ -17,7 +17,7 @@ jobs:
     - name: Install MonoGame
       run: |
         sudo apt-get update
-        sudo apt-get install -y mono-devel mono-dmcs
+        sudo apt-get install -y mono-devel mono-mcs
         wget -q https://github.com/MonoGame/MonoGame/releases/download/v3.8.0/MonoGame.zip
         unzip -q MonoGame.zip
         export PATH=$PATH:$(pwd)/MonoGameSDK/Content/Tools
