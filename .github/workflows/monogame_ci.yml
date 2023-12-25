@@ -19,6 +19,8 @@ jobs:
         sudo apt-get update
         sudo apt-get upgrade
         sudo apt-get install -y mono-devel mono-mcs
+        sudo apt-get update
+        sudo apt-get upgrade -y
         wget -q https://github.com/MonoGame/MonoGame/releases/download/v3.8.0/MonoGame.zip
         unzip -q MonoGame.zip
         export PATH=$PATH:$(pwd)/MonoGameSDK/Content/Tools
