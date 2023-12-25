@@ -1,0 +1,31 @@
+name: MonoGame Project CI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up MonoGame
+      uses: mono/monogame-action@v1
+      with:
+        target: "Linux"
+
+    - name: Build MonoGame project
+      run: |
+        dotnet new mgdesktopgl -n MyMonoGameProject
+        cd MyMonoGameProject
+        dotnet add package git://github.com/Papishushi/ScapeCore.git#main
+
+    - name: Run MonoGame project
+      run: |
+        cd MyMonoGameProject
+        dotnet build
+        dotnet run
