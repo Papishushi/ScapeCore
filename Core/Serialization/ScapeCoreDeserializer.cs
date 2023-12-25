@@ -19,6 +19,7 @@
 
 using MonoGame.Framework.Utilities.Deflate;
 using ProtoBuf.Meta;
+using ScapeCore.Core.Batching.Tools;
 using Serilog;
 using System;
 using System.IO;
@@ -26,74 +27,14 @@ using System.IO;
 
 namespace ScapeCore.Core.Serialization
 {
-    public sealed class ScapeCoreDeserializer
+    public sealed class ScapeCoreDeserializer : ScapeCoreSeralizationStreamer
     {
-        private RuntimeTypeModel _model;
-        private int _size;
-        private string _binName;
-        private string _compressedBinName;
+        public ScapeCoreDeserializer(RuntimeTypeModel model, int gzipBufferSize, string binName, string compressedBinName) :
+            base(binName, compressedBinName, model, gzipBufferSize)
+        { }
 
-        const string DESERIALIZATION_ERROR_FORMAT = "Deserialization to path {path} failed: {ex}";
+        public readonly record struct DeserializationOutput(Type Type, SerializationError Error, DeeplyMutableType Output, string Path, bool Decompressed);
 
-        public ScapeCoreDeserializer(RuntimeTypeModel model, int gzipBufferSize, string binName, string compressedBinName)
-        {
-            _size = gzipBufferSize;
-            _model = model;
-            _binName = binName;
-            _compressedBinName = compressedBinName;
-        }
-
-        public enum DeserializationError
-        {
-            None,
-            NotSerializable,
-            UnauthorizedAccess,
-            PathNotValid,
-            NullPath,
-            PathTooLong,
-            DirectoryNotFound,
-            FileNotFound,
-            NotSupported,
-            IO,
-            Serilog,
-            ModelNull
-        }
-        public readonly record struct DeserializationOutput(Type Type, DeserializationError Error, object? Output, string Path, bool Decompressed);
-        private string GetFileName(Type type, bool compress) => compress ? type.Name + _compressedBinName : type.Name + _binName;
-        private DeserializationError HandleDeserializationError(string path, Exception ex)
-        {
-            Log.Error(DESERIALIZATION_ERROR_FORMAT, path, ex.Message);
-            DeserializationError error = ex switch
-            {
-                UnauthorizedAccessException => DeserializationError.UnauthorizedAccess,
-                ArgumentNullException => DeserializationError.NullPath,
-                ArgumentException => DeserializationError.PathNotValid,
-                PathTooLongException => DeserializationError.PathTooLong,
-                DirectoryNotFoundException => DeserializationError.DirectoryNotFound,
-                FileNotFoundException => DeserializationError.FileNotFound,
-                NotSupportedException => DeserializationError.NotSupported,
-                IOException => DeserializationError.IO,
-                _ => DeserializationError.Serilog,
-            };
-            return error;
-        }
-        private bool CheckForDeserializationErrors(Type type, string path, bool compress, out DeserializationError? result)
-        {
-            if (_model == null)
-            {
-                Log.Warning(DESERIALIZATION_ERROR_FORMAT, path, "Serialization model is null.");
-                result = DeserializationError.ModelNull;
-                return true;
-            }
-            if (!_model!.CanSerialize(type))
-            {
-                Log.Error(DESERIALIZATION_ERROR_FORMAT, $"Type {type.FullName} can't be serialized.");
-                result = DeserializationError.NotSerializable;
-                return true;
-            }
-            result = null;
-            return false;
-        }
         private DeserializationOutput DeserializeFromPath(Type type, string path, bool decompress, object obj, object? userState = null)
         {
             DeserializationOutput output;
@@ -109,17 +50,22 @@ namespace ScapeCore.Core.Serialization
                     }
                 }
                 else
-                    deserialized = _model!.Deserialize(reader, obj, userState);
+                    deserialized = _model!.Deserialize(reader, obj, type);
             }
-            Log.Debug("Deserialized type {t} from {path}.", type.Name, path);
-            output = new() { Error = DeserializationError.None, Output = deserialized, Type = type, Path = path, Decompressed = decompress };
+            Log.Verbose("Deserialized type {t} from {path}.", type.Name, path);
+            output = new() { Error = SerializationError.None, Output = new(deserialized), Type = type, Path = path, Decompressed = decompress };
             return output;
         }
-        private DeserializationOutput DeserializeFromMemory(Type type, byte[] serialized, bool decompress, object obj)
+        private static MemoryStream GetCorrectMemoryStream(bool decompress, byte[] serialized, int lenght)
+        {
+            if (decompress) return new MemoryStream(serialized, false);
+            else return new MemoryStream(serialized, 0, lenght, false);
+        }
+        private DeserializationOutput DeserializeFromMemory(Type type, byte[] serialized, long lenght, bool decompress, object obj)
         {
             DeserializationOutput output;
             object? deserialized = default;
-            using (var ms = new MemoryStream(serialized, false))
+            using (var ms = GetCorrectMemoryStream(decompress, serialized, (int)lenght))
             {
                 if (decompress)
                 {
@@ -133,58 +79,59 @@ namespace ScapeCore.Core.Serialization
                     deserialized = _model!.Deserialize(ms, obj, type);
             }
 
-            Log.Debug("Deserialized type {t}.", type.Name);
-            output = new() { Error = DeserializationError.None, Output = deserialized, Type = type, Path = string.Empty, Decompressed = decompress };
+            Log.Verbose("Deserialized type {t}.", type.Name);
+            output = new() { Error = SerializationError.None, Output = new(deserialized), Type = type, Path = string.Empty, Decompressed = decompress };
             return output;
         }
+
         public DeserializationOutput Deserialize<T>(string path, T? obj = default, bool decompress = false, object? userState = null)
         {
-            if (CheckForDeserializationErrors(typeof(T), path, decompress, out var output)) return new() { Error = output!.Value, Output = default, Type = typeof(T), Path = path, Decompressed = decompress };
-            if (string.IsNullOrEmpty(path)) return new() { Error = DeserializationError.NullPath, Output = default, Type = typeof(T), Path = path, Decompressed = decompress };
+            if (CheckForSerializationErrors(DESERIALIZATION_ERROR_FORMAT, typeof(T), path, decompress, out var output)) return new() { Error = output!.Value, Output = default, Type = typeof(T), Path = path, Decompressed = decompress };
+            if (string.IsNullOrEmpty(path)) return new() { Error = SerializationError.NullPath, Output = default, Type = typeof(T), Path = path, Decompressed = decompress };
             try
             {
                 return DeserializeFromPath(typeof(T), path, decompress, obj, userState);
             }
             catch (Exception ex)
             {
-                return new() { Error = HandleDeserializationError(path, ex), Output = default, Type = typeof(T), Path = path, Decompressed = decompress };
+                return new() { Error = HandleSerializationError(DESERIALIZATION_ERROR_FORMAT, path, ex), Output = default, Type = typeof(T), Path = path, Decompressed = decompress };
             }
         }
         public DeserializationOutput Deserialize(Type type, string path, object? obj = default, bool decompress = false, object? userState = null)
         {
-            if (CheckForDeserializationErrors(type, path, decompress, out var output)) return new() { Error =output!.Value, Output = default, Type = type, Path = path, Decompressed = decompress };
-            if (string.IsNullOrEmpty(path)) return new() { Error = DeserializationError.NullPath, Output = default, Type = type, Path = path, Decompressed = decompress };
+            if (CheckForSerializationErrors(DESERIALIZATION_ERROR_FORMAT, type, path, decompress, out var output)) return new() { Error =output!.Value, Output = default, Type = type, Path = path, Decompressed = decompress };
+            if (string.IsNullOrEmpty(path)) return new() { Error = SerializationError.NullPath, Output = default, Type = type, Path = path, Decompressed = decompress };
             try
             {
                 return DeserializeFromPath(type, path, decompress, obj, userState);
             }
             catch (Exception ex)
             {
-                return new() { Error = HandleDeserializationError(path, ex), Output = default, Type = type, Path = path, Decompressed = decompress };
+                return new() { Error = HandleSerializationError(DESERIALIZATION_ERROR_FORMAT, path, ex), Output = default, Type = type, Path = path, Decompressed = decompress };
             }
         }
-        public DeserializationOutput Deserialize<T>(byte[] serialized, T? obj = default, bool decompress = false, object? userState = null)
+        public DeserializationOutput Deserialize<T>(byte[] serialized, long lenght, T? obj = default, bool decompress = false, object? userState = null)
         {
-            if (CheckForDeserializationErrors(typeof(T), string.Empty, decompress, out var output)) return new() { Error = output!.Value, Output = default, Type = typeof(T), Path = string.Empty, Decompressed = decompress };
+            if (CheckForSerializationErrors(DESERIALIZATION_ERROR_FORMAT, typeof(T), string.Empty, decompress, out var output)) return new() { Error = output!.Value, Output = default, Type = typeof(T), Path = string.Empty, Decompressed = decompress };
             try
             {
-                return DeserializeFromMemory(typeof(T), serialized, decompress, obj);
+                return DeserializeFromMemory(typeof(T), serialized, lenght, decompress, obj);
             }
             catch (Exception ex)
             {
-                return new() { Error = HandleDeserializationError(string.Empty, ex), Output = default, Type = typeof(T), Path = string.Empty, Decompressed = decompress };
+                return new() { Error = HandleSerializationError(DESERIALIZATION_ERROR_FORMAT, string.Empty, ex), Output = default, Type = typeof(T), Path = string.Empty, Decompressed = decompress };
             }
         }
-        public DeserializationOutput Deserialize(Type type, byte[] serialized, object? obj = default, bool decompress = false, object? userState = null)
+        public DeserializationOutput Deserialize(Type type, byte[] serialized, long lenght, object? obj = default, bool decompress = false, object? userState = null)
         {
-            if (CheckForDeserializationErrors(type, string.Empty, decompress, out var output)) return new() { Error = output!.Value, Output = default, Type = type, Path = string.Empty, Decompressed = decompress };
+            if (CheckForSerializationErrors(DESERIALIZATION_ERROR_FORMAT, type, string.Empty, decompress, out var output)) return new() { Error = output!.Value, Output = default, Type = type, Path = string.Empty, Decompressed = decompress };
             try
             {
-                return DeserializeFromMemory(type, serialized, decompress, obj);
+                return DeserializeFromMemory(type, serialized, lenght, decompress, obj);
             }
             catch (Exception ex)
             {
-                return new() { Error = HandleDeserializationError(string.Empty, ex), Output = default, Type = type, Path = string.Empty, Decompressed = decompress };
+                return new() { Error = HandleSerializationError(DESERIALIZATION_ERROR_FORMAT, string.Empty, ex), Output = default, Type = type, Path = string.Empty, Decompressed = decompress };
             }
         }
     }

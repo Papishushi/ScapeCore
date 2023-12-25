@@ -79,6 +79,7 @@ namespace ScapeCore.Core.Serialization
             var fieldIndex = FIELD_PROTOBUF_INDEX;
             var metaType = runtimeModel.Add(type, false);
             Log.Debug("Type {type} was configured for [de]Serialization...", type.Name);
+            if (type.IsEnum) return;
             SetFieldsSubTypesAndProperties(runtimeModel, type, metaType, ref fieldIndex);
         }
 
@@ -94,14 +95,27 @@ namespace ScapeCore.Core.Serialization
         {
             foreach (var field in type.GetFields())
             {
-                if (field.FieldType.Name == typeof(object).Name)
+                try
                 {
-                    Log.Warning(FIELD_ERROR_MESSAGE, field.Name, type.Name, typeof(DeeplyMutableType).FullName);
-                    continue;
+                    if (field.FieldType.Name == typeof(object).Name)
+                    {
+                        Log.Warning(FIELD_ERROR_MESSAGE, field.Name, type.Name, typeof(DeeplyMutableType).FullName);
+                        continue;
+                    }
+                    AddField(metaType, field, type, ref fieldIndex);
                 }
-                metaType.Add(fieldIndex++, field.Name);
-                Log.Verbose("\tField [{i}]{field}[{t}] from Type {type}", fieldIndex - 1, field.Name, field.FieldType, type.Name);
+                catch (Exception ex)
+                {
+                    Log.Warning("Serialization Manager can not determine type of field {property} from {type}.", field.Name, type);
+                    Log.Verbose("{ex}", ex.Message);
+                }
             }
+        }
+
+        private void AddField(MetaType metaType, FieldInfo field, Type type, ref int fieldIndex)
+        {
+            metaType.Add(fieldIndex++, field.Name);
+            Log.Verbose("\tField [{i}]{field}[{t}] from Type {type}", fieldIndex - 1, field.Name, field.FieldType, type.Name);
         }
 
         private void SetSubType(Type type, RuntimeTypeModel runtimeModel)
@@ -130,13 +144,13 @@ namespace ScapeCore.Core.Serialization
         {
             foreach (var property in type.GetProperties())
             {
-                if (property.PropertyType.Name == typeof(object).Name)
-                {
-                    Log.Warning(PROPERTY_ERROR_MESSAGE, property.Name, type.Name, typeof(DeeplyMutableType).FullName);
-                    continue;
-                }
                 try
                 {
+                    if (property.PropertyType.Name == typeof(object).Name)
+                    {
+                        Log.Warning(PROPERTY_ERROR_MESSAGE, property.Name, type.Name, typeof(DeeplyMutableType).FullName);
+                        continue;
+                    }
                     AddProperty(metaType, property, type, ref fieldIndex);
                 }
                 catch (Exception ex)

@@ -72,7 +72,7 @@ namespace ScapeCore.Targets
 
         public LLAM()
         {
-            Log.Logger = new LoggerConfiguration().MinimumLevel.Verbose().WriteTo.Async(wt => wt.Console(theme: AnsiConsoleTheme.Code)).CreateLogger();
+            Log.Logger = new LoggerConfiguration().MinimumLevel.Debug().WriteTo.Async(wt => wt.Console(theme: AnsiConsoleTheme.Code)).CreateLogger();
             Log.Information("Constructing Game...");
 
             Log.Debug("Setting singleton pattern.");

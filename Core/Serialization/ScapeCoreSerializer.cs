@@ -27,53 +27,14 @@ using System.IO;
 
 namespace ScapeCore.Core.Serialization
 {
-    public sealed class ScapeCoreSerializer
+    public sealed class ScapeCoreSerializer : ScapeCoreSeralizationStreamer
     {
-        private RuntimeTypeModel _model;
-        private int _size;
-        private string _binName;
-        private string _compressedBinName;
+        public ScapeCoreSerializer(RuntimeTypeModel model, int gzipBufferSize, string binName, string compressedBinName) :
+            base(binName, compressedBinName, model, gzipBufferSize)
+        { }
 
-        const string SERIALIZATION_ERROR_FORMAT = "Serialization to path {path} failed: {ex}";
+        public readonly record struct SerializationOutput(Type Type, SerializationError Error, byte[]? Data, long Size, string Path, bool Compressed);
 
-        public ScapeCoreSerializer(RuntimeTypeModel model, int gzipBufferSize, string binName, string compressedBinName)
-        {
-            _size = gzipBufferSize;
-            _model = model;
-            _binName = binName;
-            _compressedBinName = compressedBinName;
-        }
-
-        public enum SerializationError
-        {
-            None,
-            NotSerializable,
-            UnauthorizedAccess,
-            PathNotValid,
-            NullPath,
-            PathTooLong,
-            DirectoryNotFound,
-            NotSupported,
-            Serilog,
-            ModelNull
-        }
-        public readonly record struct SerializationOutput(SerializationError Error, byte[]? Data, long Size, string Path, bool Compressed);
-        private string GetFileName(Type type, bool compress) => compress ? type.Name + _compressedBinName : type.Name + _binName;
-        private SerializationError HandleSerializationError(string path, Exception ex)
-        {
-            Log.Error(SERIALIZATION_ERROR_FORMAT, path, ex.Message);
-            SerializationError error = ex switch
-            {
-                UnauthorizedAccessException => SerializationError.UnauthorizedAccess,
-                ArgumentNullException => SerializationError.NullPath,
-                ArgumentException => SerializationError.PathNotValid,
-                PathTooLongException => SerializationError.PathTooLong,
-                DirectoryNotFoundException => SerializationError.DirectoryNotFound,
-                NotSupportedException => SerializationError.NotSupported,
-                _ => SerializationError.Serilog,
-            };
-            return error;
-        }
         private SerializationOutput SerializeToPath(Type type, string path, bool compress, object obj, object? userState = null)
         {
             long size = 0;
@@ -97,8 +58,8 @@ namespace ScapeCore.Core.Serialization
                     data = writer.ToByteArray();
                 }
             }
-            Log.Debug("Serialized {l} bytes from {type} into {path}", size, type, path);
-            output = new() { Error = SerializationError.None, Data = data, Size = size, Path = path, Compressed = compress };
+            Log.Verbose("Serialized {l} bytes from {type} into {path}", size, type, path);
+            output = new() { Type = type, Error = SerializationError.None, Data = data, Size = size, Path = path, Compressed = compress };
             return output;
         }
         private SerializationOutput SerializeToMemory(Type type, bool compress, object obj, object? userState = null)
@@ -117,34 +78,16 @@ namespace ScapeCore.Core.Serialization
                     }
                 }
                 else
-                {
                     size = _model!.Serialize(ms, obj, userState);
-                }
             }
-            Log.Debug("Serialized {l} bytes from {type}", size, type);
-            output = new() { Error = SerializationError.None, Data = data, Size = size, Path = string.Empty, Compressed = compress };
+            Log.Verbose("Serialized {l} bytes from {type}", size, type);
+            output = new() { Type = type, Error = SerializationError.None, Data = data, Size = size, Path = string.Empty, Compressed = compress };
             return output;
         }
-        private bool CheckForSerializationErrors(Type type, string path, bool compress, out SerializationError? result)
-        {
-            if (_model == null)
-            {
-                Log.Warning(SERIALIZATION_ERROR_FORMAT, path, "Serialization model is null.");
-                result = SerializationError.ModelNull;
-                return true;
-            }
-            if (!_model!.CanSerialize(type))
-            {
-                Log.Error(SERIALIZATION_ERROR_FORMAT, $"Type {type.FullName} can't be serialized.");
-                result = SerializationError.NotSerializable;
-                return true;
-            }
-            result = null;
-            return false;
-        }
+
         public SerializationOutput Serialize<T>(T obj, string path, bool compress = false, object? userState = null)
         {
-            if (CheckForSerializationErrors(typeof(T), path, compress, out var output)) return new() { Error = output ?? default, Data = default, Size = 0, Path = path, Compressed = compress };
+            if (CheckForSerializationErrors(SERIALIZATION_ERROR_FORMAT, typeof(T), path, compress, out var output)) return new() { Error = output ?? default, Data = default, Size = 0, Path = path, Compressed = compress };
             if (string.IsNullOrEmpty(path)) return new() { Error = SerializationError.NullPath, Data = default, Size = 0, Path = path, Compressed = compress };
             try
             {
@@ -152,12 +95,12 @@ namespace ScapeCore.Core.Serialization
             }
             catch (Exception ex)
             {
-                return new() { Error = HandleSerializationError(path, ex), Data = default, Size = 0, Path = path, Compressed = compress };
+                return new() { Error = HandleSerializationError(SERIALIZATION_ERROR_FORMAT, path, ex), Data = default, Size = 0, Path = path, Compressed = compress };
             }
         }
         public SerializationOutput Serialize(Type type, object? obj, string path, bool compress = false, object? userState = null)
         {
-            if (CheckForSerializationErrors(type, path, compress, out var output)) return new() { Error = output ?? default, Data = default, Size = 0, Path = path, Compressed = compress };
+            if (CheckForSerializationErrors(SERIALIZATION_ERROR_FORMAT, type, path, compress, out var output)) return new() { Error = output ?? default, Data = default, Size = 0, Path = path, Compressed = compress };
             if (string.IsNullOrEmpty(path)) return new() { Error = SerializationError.NullPath, Data = default, Size = 0, Path = path, Compressed = compress };
             try
             {
@@ -165,31 +108,31 @@ namespace ScapeCore.Core.Serialization
             }
             catch (Exception ex)
             {
-                return new() { Error = HandleSerializationError(path, ex), Data = default, Size = 0, Path = path, Compressed = compress };
+                return new() { Error = HandleSerializationError(SERIALIZATION_ERROR_FORMAT, path, ex), Data = default, Size = 0, Path = path, Compressed = compress };
             }
         }
         public SerializationOutput Serialize<T>(T obj, bool compress = false, object? userState = null)
         {
-            if (CheckForSerializationErrors(typeof(T), string.Empty, compress, out var output)) return new() { Error = output ?? default, Data = default, Size = 0, Path = string.Empty, Compressed = compress };
+            if (CheckForSerializationErrors(SERIALIZATION_ERROR_FORMAT, typeof(T), string.Empty, compress, out var output)) return new() { Error = output ?? default, Data = default, Size = 0, Path = string.Empty, Compressed = compress };
             try
             {
                 return SerializeToMemory(typeof(T), compress, obj, userState);
             }
             catch (UnauthorizedAccessException ex)
             {
-                return new() { Error = HandleSerializationError(string.Empty, ex), Data = default, Size = 0, Path = string.Empty, Compressed = compress };
+                return new() { Error = HandleSerializationError(SERIALIZATION_ERROR_FORMAT, string.Empty, ex), Data = default, Size = 0, Path = string.Empty, Compressed = compress };
             }
         }
         public SerializationOutput Serialize(Type type, object? obj, bool compress = false, object? userState = null)
         {
-            if (CheckForSerializationErrors(type, string.Empty, compress, out var output)) return new() { Error = output ?? default, Data = default, Size = 0, Path = string.Empty, Compressed = compress };
+            if (CheckForSerializationErrors(SERIALIZATION_ERROR_FORMAT, type, string.Empty, compress, out var output)) return new() { Error = output ?? default, Data = default, Size = 0, Path = string.Empty, Compressed = compress };
             try
             {
                 return SerializeToMemory(type, compress, obj, userState);
             }
             catch (UnauthorizedAccessException ex)
             {
-                return new() { Error = HandleSerializationError(string.Empty, ex), Data = default, Size = 0, Path = string.Empty, Compressed = compress };
+                return new() { Error = HandleSerializationError(SERIALIZATION_ERROR_FORMAT, string.Empty, ex), Data = default, Size = 0, Path = string.Empty, Compressed = compress };
             }
         }
     }

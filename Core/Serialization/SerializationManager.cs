@@ -27,7 +27,13 @@ using ScapeCore.Core.Collections.Merkle;
 using ScapeCore.Core.Engine;
 using ScapeCore.Core.Engine.Components;
 using ScapeCore.Targets;
+using Serilog;
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Xml.Linq;
 using static ScapeCore.Core.Serialization.RuntimeModelFactory;
 
 namespace ScapeCore.Core.Serialization
@@ -43,37 +49,7 @@ namespace ScapeCore.Core.Serialization
         private static ScapeCoreSerializer? _serializer = null;
         private static ScapeCoreDeserializer? _deserializer = null;
 
-        private readonly static Type[] _types =
-        {
-            typeof(MerkleNode<>),
-            typeof(MerkleTree<>),
-            typeof(DeeplyMutableType),
-            typeof(DeeplyMutable<>),
-            typeof(WeakReference<>),
-            typeof(Game),
-            typeof(LLAM),
-
-            typeof(Behaviour),
-            typeof(Component),
-            typeof(Transform),
-            typeof(GameObject),
-            typeof(MonoBehaviour),
-
-            typeof(Texture2D),
-            typeof(Renderer),
-            typeof(RectTransform),
-            typeof(SpriteRenderer),
-
-            typeof(ResourceWrapper),
-            typeof(ResourceInfo),
-            typeof(ResourceDependencyTree),
-
-            typeof(LoadBatchEventArgs),
-            typeof(StartBatchEventArgs),
-            typeof(UpdateBatchEventArgs),
-            typeof(RenderBatchEventArgs),
-            typeof(GameTime)
-        };
+        private readonly static Type[] _buildInTypes;
         internal static TypeModel? Model { get => _modelFactory?.Model; }
         public static RuntimeTypeModel? GetRuntimeClone() => _modelFactory?.Model?.DeepCopy();
         public static ScapeCoreSerializer? Serializer { get => _serializer; }
@@ -81,11 +57,27 @@ namespace ScapeCore.Core.Serialization
 
         static SerializationManager()
         {
-            _modelFactory = new RuntimeModelFactory(_types);
-            ConfigureModelAndSerializers(_modelFactory.Model!);
+            var assembly = typeof(SerializationManager).Assembly;
+            var path = Path.Combine(assembly.Location[..assembly.Location.LastIndexOf('\\')], @"BuildinTypes.xml");
+            var types = ParseXmlToTypesArray(path);
+            var l = new List<Type>();
+            var assemblyTypes = assembly.GetTypes();
+            foreach (var type in assemblyTypes)
+                if(types.Contains(type.Name)) l.Add(type);
+            _buildInTypes = l.ToArray();
+            _modelFactory = new RuntimeModelFactory(_buildInTypes);
+            ConfigureSerializers(_modelFactory.Model!);
         }
 
-        private static void ConfigureModelAndSerializers(RuntimeTypeModel runtimeModel)
+        private static string[]? ParseXmlToTypesArray(string xmlFilePath)
+        {
+            var xmlDoc = XDocument.Load(xmlFilePath);
+            XNamespace ns = "http://schemas.microsoft.com/powershell/2004/04";
+            var types = xmlDoc?.Root?.Elements(ns + "Type").Select(type => type.Value).ToArray();
+            return types;
+        }
+
+        private static void ConfigureSerializers(RuntimeTypeModel runtimeModel)
         {
             _serializer = new(runtimeModel, GZIP_BUFFER_SIZE, PROTOBUFFER_BINARY, PROTOBUFER_COMPRESSED_BINARY);
             _deserializer = new(runtimeModel, GZIP_BUFFER_SIZE, PROTOBUFFER_BINARY, PROTOBUFER_COMPRESSED_BINARY);
@@ -93,7 +85,14 @@ namespace ScapeCore.Core.Serialization
 
         public static void AddType(Type type) => _modelFactory?.AddType(type);
 
-        public static ChangeModelOutput ChangeModel(RuntimeTypeModel model) => (_modelFactory ??= new(_types)).ChangeModel(model);
+        public static ChangeModelOutput ChangeModel(RuntimeTypeModel model)
+        {
+            var output = (_modelFactory ??= new(_buildInTypes)).ChangeModel(model);
+            ConfigureSerializers(model);
+            return output;
+        }
+
+        public static void ResetFactory() => _modelFactory = new RuntimeModelFactory(_buildInTypes);
 
     }
 }
