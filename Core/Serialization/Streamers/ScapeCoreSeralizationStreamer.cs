@@ -22,14 +22,14 @@ using System;
 using System.IO;
 
 
-namespace ScapeCore.Core.Serialization
+namespace ScapeCore.Core.Serialization.Streamers
 {
-    public abstract class ScapeCoreSeralizationStreamer
+    public abstract class ScapeCoreSeralizationStreamer : GZipStreamer
     {
         protected readonly string _binName;
         protected readonly string _compressedBinName;
         protected readonly RuntimeTypeModel _model;
-        protected readonly int _size;
+
         protected const string DESERIALIZATION_ERROR_FORMAT = "Deserialization to path {path} failed: {ex}";
         protected const string SERIALIZATION_ERROR_FORMAT = "Serialization to path {path} failed: {ex}";
 
@@ -49,12 +49,11 @@ namespace ScapeCore.Core.Serialization
             ModelNull
         }
 
-        protected ScapeCoreSeralizationStreamer(string binName, string compressedBinName, RuntimeTypeModel model, int size)
+        protected ScapeCoreSeralizationStreamer(string binName, string compressedBinName, RuntimeTypeModel model, int size) : base(size)
         {
             _binName = binName;
             _compressedBinName = compressedBinName;
             _model = model;
-            _size = size;
         }
         protected string GetFileName(Type type, bool compress) => compress ? type.Name + _compressedBinName : type.Name + _binName;
         protected bool CheckForSerializationErrors(string errorFormat, Type type, string path, bool compress, out SerializationError? result)

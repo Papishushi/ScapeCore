@@ -17,15 +17,13 @@
  * runtime.
  */
 
-using MonoGame.Framework.Utilities.Deflate;
 using ProtoBuf.Meta;
-using ScapeCore.Core.Serialization.Tools;
 using Serilog;
 using System;
 using System.IO;
 
 
-namespace ScapeCore.Core.Serialization
+namespace ScapeCore.Core.Serialization.Streamers
 {
     public sealed class ScapeCoreSerializer : ScapeCoreSeralizationStreamer
     {
@@ -35,100 +33,98 @@ namespace ScapeCore.Core.Serialization
 
         public readonly record struct SerializationOutput(Type Type, SerializationError Error, byte[]? Data, long Size, string Path, bool Compressed);
 
-        private SerializationOutput SerializeToPath(Type type, string path, bool compress, object obj, object? userState = null)
+        private SerializationOutput SerializeToPath(Type type, string path, bool compress, object? obj)
         {
-            long size = 0;
             byte[]? data = null;
             SerializationOutput output;
 
+            using (MemoryStream ms = new MemoryStream())
+            {
+                _model!.SerializeWithLengthPrefix(ms, obj, type, ProtoBuf.PrefixStyle.Base128, 0);
+                data = ms.ToArray();
+            }
+
+            if (compress)
+                data = Compress(data);
+
+            var size = data.Length;
+
             using (var writer = File.Open(Path.Combine(path, GetFileName(type, compress)), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read))
             {
-                if (compress)
-                {
-                    using (var gzip = new GZipStream(writer, CompressionMode.Compress, false))
-                    using (var bs = new BufferedStream(gzip, _size))
-                    {
-                        size = _model!.Serialize(bs, obj, userState);
-                        data = bs.ToByteArray();
-                    }
-                }
-                else
-                {
-                    size = _model!.Serialize(writer, obj, userState);
-                    data = writer.ToByteArray();
-                }
+                writer.Write(data, 0, size);
             }
+
             Log.Verbose("Serialized {l} bytes from {type} into {path}", size, type, path);
+
             output = new() { Type = type, Error = SerializationError.None, Data = data, Size = size, Path = path, Compressed = compress };
             return output;
         }
-        private SerializationOutput SerializeToMemory(Type type, bool compress, object obj, object? userState = null)
+        private SerializationOutput SerializeToMemory(Type type, bool compress, object? obj)
         {
-            long size = 0;
-            byte[] data = new byte[_size];
+            byte[] data;
             SerializationOutput output;
-            using (MemoryStream ms = new MemoryStream(data, true))
+
+            using (MemoryStream ms = new MemoryStream())
             {
-                if (compress)
-                {
-                    using (var gzip = new GZipStream(ms, CompressionMode.Compress, false))
-                    using (var bs = new BufferedStream(gzip, _size))
-                    {
-                        size = _model!.Serialize(bs, obj, userState);
-                    }
-                }
-                else
-                    size = _model!.Serialize(ms, obj, userState);
+                _model!.SerializeWithLengthPrefix(ms, obj, type, ProtoBuf.PrefixStyle.Base128, 0);
+                data = ms.ToArray();
             }
+
+            if (compress)
+                data = Compress(data);
+
+            var size = data.Length;
+
             Log.Verbose("Serialized {l} bytes from {type}", size, type);
+
             output = new() { Type = type, Error = SerializationError.None, Data = data, Size = size, Path = string.Empty, Compressed = compress };
             return output;
         }
 
-        public SerializationOutput Serialize<T>(T obj, string path, bool compress = false, object? userState = null)
+        public SerializationOutput Serialize<T>(T obj, string path, bool compress = false)
         {
             if (CheckForSerializationErrors(SERIALIZATION_ERROR_FORMAT, typeof(T), path, compress, out var output)) return new() { Error = output ?? default, Data = default, Size = 0, Path = path, Compressed = compress };
             if (string.IsNullOrEmpty(path)) return new() { Error = SerializationError.NullPath, Data = default, Size = 0, Path = path, Compressed = compress };
             try
             {
-                return SerializeToPath(typeof(T), path, compress, obj, userState);
+                return SerializeToPath(typeof(T), path, compress, obj);
             }
             catch (Exception ex)
             {
                 return new() { Error = HandleSerializationError(SERIALIZATION_ERROR_FORMAT, path, ex), Data = default, Size = 0, Path = path, Compressed = compress };
             }
         }
-        public SerializationOutput Serialize(Type type, object? obj, string path, bool compress = false, object? userState = null)
+        public SerializationOutput Serialize(Type type, object? obj, string path, bool compress = false)
         {
             if (CheckForSerializationErrors(SERIALIZATION_ERROR_FORMAT, type, path, compress, out var output)) return new() { Error = output ?? default, Data = default, Size = 0, Path = path, Compressed = compress };
             if (string.IsNullOrEmpty(path)) return new() { Error = SerializationError.NullPath, Data = default, Size = 0, Path = path, Compressed = compress };
             try
             {
-                return SerializeToPath(type, path, compress, obj, userState);
+                return SerializeToPath(type, path, compress, obj);
             }
             catch (Exception ex)
             {
                 return new() { Error = HandleSerializationError(SERIALIZATION_ERROR_FORMAT, path, ex), Data = default, Size = 0, Path = path, Compressed = compress };
             }
         }
-        public SerializationOutput Serialize<T>(T obj, bool compress = false, object? userState = null)
+        public SerializationOutput Serialize<T>(T obj, bool compress = false)
         {
             if (CheckForSerializationErrors(SERIALIZATION_ERROR_FORMAT, typeof(T), string.Empty, compress, out var output)) return new() { Error = output ?? default, Data = default, Size = 0, Path = string.Empty, Compressed = compress };
             try
             {
-                return SerializeToMemory(typeof(T), compress, obj, userState);
+                return SerializeToMemory(typeof(T), compress, obj);
             }
             catch (UnauthorizedAccessException ex)
             {
                 return new() { Error = HandleSerializationError(SERIALIZATION_ERROR_FORMAT, string.Empty, ex), Data = default, Size = 0, Path = string.Empty, Compressed = compress };
             }
         }
-        public SerializationOutput Serialize(Type type, object? obj, bool compress = false, object? userState = null)
+        public SerializationOutput Serialize(Type type, object? obj, bool compress = false)
         {
             if (CheckForSerializationErrors(SERIALIZATION_ERROR_FORMAT, type, string.Empty, compress, out var output)) return new() { Error = output ?? default, Data = default, Size = 0, Path = string.Empty, Compressed = compress };
             try
             {
-                return SerializeToMemory(type, compress, obj, userState);
+                return SerializeToMemory(type, compress, obj);
             }
             catch (UnauthorizedAccessException ex)
             {
