@@ -18,13 +18,15 @@ jobs:
       run: |
         chmod +x ./Core/BuildinTypesUpdater.sh
         ./Core/BuildinTypesUpdater.sh
-
+    
     - name: Commit and Push Changes
       run: |
         git config --global user.email "danielmolinero111@cyberdude.com"
         git config --global user.name "Papishushi"
         git add .
         git commit -m "Update BuildinTypes.xml via GitHub Actions"
-        git push https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/Papishushi/ScapeCore.git
+        git push
+
+
 
 
