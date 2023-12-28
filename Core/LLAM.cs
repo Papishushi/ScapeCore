@@ -45,6 +45,7 @@ using System.Runtime.CompilerServices;
 
 namespace ScapeCore.Targets
 {
+
     //Low Level Automation Module
     public class LLAM : Game
     {
@@ -55,6 +56,8 @@ namespace ScapeCore.Targets
         public GraphicsDeviceManager Graphics { get => _graphics; }
         public SpriteBatch? SpriteBatch { get => _spriteBatch; }
         public static WeakReference<LLAM?> Instance { get; private set; }
+        private GameTime _time;
+        public GameTime Time { get => _time; }
 
         internal event UpdateBatchEventHandler? OnUpdate;
         internal event StartBatchEventHandler? OnStart;
@@ -107,7 +110,7 @@ namespace ScapeCore.Targets
             _graphics = new(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
-            IsFixedTimeStep = true;
+            IsFixedTimeStep = false;
         }
 
         protected override void Initialize()
@@ -133,14 +136,13 @@ namespace ScapeCore.Targets
             //Debug.WriteLine("Update...");
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-
+            _time = gameTime;
             // TODO: Add your update logic here
             OnStart?.Invoke(this, new(string.Empty));
             Log.Verbose("{{{@source}}}\t{@args}", GetHashCode(), $"Start cycle number\t{_si++}\t|\tPatch size\t{OnStart?.GetInvocationList().Length ?? 0}");
             OnStart = null;
             OnUpdate?.Invoke(this, new(gameTime, string.Empty));
             Log.Verbose("{{{@source}}}\t{@args}", GetHashCode(), $"Update cycle number\t{_ui++}\t|\tPatch size\t{OnUpdate?.GetInvocationList().Length ?? 0}");
-
             base.Update(gameTime);
         }
 
@@ -148,6 +150,9 @@ namespace ScapeCore.Targets
         {
             //Debug.WriteLine("Draw...");
             GraphicsDevice.Clear(Color.CornflowerBlue);
+
+            _ = new FPSMetric();
+            //Log.Debug("{fps}", FPSMetric.FPS);
 
             //Render Patches
             _spriteBatch!.Begin();

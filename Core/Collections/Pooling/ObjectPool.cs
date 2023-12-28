@@ -15,13 +15,14 @@
  * A typeless collection used for pooling objects and reusing them.
  */
 
+using ScapeCore.Core.Batching.Tools;
 using Serilog;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace ScapeCore.Core.Batching.Tools
+namespace ScapeCore.Core.Collections.Pooling
 {
     public sealed class ObjectPool : IDisposable
     {

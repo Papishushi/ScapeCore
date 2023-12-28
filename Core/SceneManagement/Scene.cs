@@ -18,6 +18,7 @@
  */
 
 using ScapeCore.Core.Batching.Tools;
+using ScapeCore.Core.Collections.Pooling;
 using ScapeCore.Core.Engine;
 using Serilog;
 using System;
@@ -42,8 +43,8 @@ namespace ScapeCore.Core.SceneManagement
         public IList MonoBehaviours { get => ArrayList.Synchronized(_monoBehaviours); }
         public IList GameObjects { get => ArrayList.Synchronized(_gameObjects); }
 
-        private readonly ConcurrentQueue<Func<DeeplyMutableType, bool>> _objectGenerators = new();
-        private readonly ConcurrentStack<TaskCompletionSource<DeeplyMutableType>> _instantiationCompletionSources = new();
+        private readonly record struct GeneratorCompletionReference(Func<DeeplyMutableType, bool> Generator, TaskCompletionSource<DeeplyMutableType> CompletionReference);
+        private readonly ConcurrentStack<GeneratorCompletionReference> _objectGeneratorCompletionReferences = new();
 
         private readonly Task _instantiateInvocations;
         private readonly CancellationTokenSource _cancellationTokenSource = new();
@@ -61,126 +62,100 @@ namespace ScapeCore.Core.SceneManagement
         {
             do
             {
-                if (!_objectGenerators.IsEmpty && _objectGenerators.TryDequeue(out var generator))
+                if (!_objectGeneratorCompletionReferences.IsEmpty && _objectGeneratorCompletionReferences.TryPop(out var generatorCompletionReference))
                 {
                     DeeplyMutableType deeplyMutable = new();
-                    var b = generator?.Invoke(deeplyMutable);
-                    if (b ?? false)
-                    {
-                        if (_instantiationCompletionSources?.TryPop(out var tcs) ?? false)
-                            tcs.SetResult(deeplyMutable);
-                        else
-                            Log.Error("Scene {name} encountered a problem while instantiating an invocation." +
-                                " Stack wasn't able to pop the {tcs} for the current instantiation, but item was correctly instantiated.", name, typeof(TaskCompletionSource<DeeplyMutableType>));
-                    }
+                    var b = generatorCompletionReference.Generator.Invoke(deeplyMutable);
+                    if (b)
+                        generatorCompletionReference.CompletionReference.SetResult(deeplyMutable);
+                    else
+                        Log.Error("Scene {name} encountered a problem while instantiating an invocation." +
+                            " Stack wasn't able to pop the {tcs} for the current instantiation, but item was correctly instantiated.", name, typeof(TaskCompletionSource<DeeplyMutableType>));
                 }
             }
             while (!_cancellationTokenSource.IsCancellationRequested);
+        }
 
+        private bool InstantiateTypeToDeeplyMutable(DeeplyMutableType value, Type? type)
+        {
+            if (type == null) return false;
+            try
+            {
+                _typePools.TryAdd(type, new ObjectPool(() => new DeeplyMutableType(Activator.CreateInstance(type))));
+                value.Value = _typePools[type].Get.Value;
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Scene {name} encountered a problem while instantiating object of type {t}\t:\t{ex}", name, type, ex.Message);
+                return false;
+            }
+            return true;
+        }
+
+        private async Task<DeeplyMutableType> PushInstantiation(Func<DeeplyMutableType, bool> generator)
+        {
+            var tcs = new TaskCompletionSource<DeeplyMutableType>();
+            _objectGeneratorCompletionReferences.Push(new(generator, tcs));
+            return await tcs.Task;
+        }
+
+        private void AddToTrackers(dynamic result)
+        {
+            if (result == null) return;
+            _monoBehaviours.Add(result);
+            _gameObjects.Add(result.gameObject!);
         }
 
         public async Task<T?> AddToSceneAsync<T>() where T : MonoBehaviour
         {
-            bool Instantiate(DeeplyMutableType value)
+            bool Instantiate(DeeplyMutableType value) => InstantiateTypeToDeeplyMutable(value, typeof(T));
+            var result = (await PushInstantiation(Instantiate)).Value;
+            AddToTrackers(result);
+            return result;
+        }
+
+        public async Task<List<T>> AddToSceneMultipleAsync<T>(int cuantity) where T : MonoBehaviour
+        {
+            bool Instantiate(DeeplyMutableType value) => InstantiateTypeToDeeplyMutable(value, typeof(T));
+            List<T> results = new();
+            await Task.Run(() =>
             {
-                try
+                Parallel.For(0, cuantity, async (int i) =>
                 {
-                    _typePools.TryAdd(typeof(T), new ObjectPool(() => new DeeplyMutable<T>((T?)Activator.CreateInstance(typeof(T)))));
-                    value.Value = _typePools[typeof(T)].Get.Value;
-                }
-                catch (Exception ex)
-                {
-                    Log.Error("Scene {name} encountered a problem while instantiating object of type {t}\t:\t{ex}", name, typeof(T), ex.Message);
-                    return false;
-                }
-                return true;
-            }
-
-            _objectGenerators.Enqueue(Instantiate);
-            var tcs = new TaskCompletionSource<DeeplyMutableType>();
-            _instantiationCompletionSources.Push(tcs);
-            var result = await tcs.Task;
-
-            return (T?)result.Value;
+                    var result = (await PushInstantiation(Instantiate)).Value;
+                    AddToTrackers(result);
+                    results.Add(result);
+                });
+            });
+            return results;
         }
 
         public async Task<DeeplyMutableType> AddToSceneAsync(Type type)
         {
-            bool Instantiate(DeeplyMutableType value)
-            {
-                try
-                {
-                    _typePools.TryAdd(type, new ObjectPool(() => new(Activator.CreateInstance(type))));
-                    value.Value = _typePools[type].Get.Value;
-                }
-                catch (Exception ex)
-                {
-                    Log.Error("Scene {name} encountered a problem while instantiating object of type {t}\t:\t{ex}", name, type, ex.Message);
-                    return false;
-                }
-                return true;
-            }
-
-            _objectGenerators.Enqueue(Instantiate);
-            var tcs = new TaskCompletionSource<DeeplyMutableType>();
-            _instantiationCompletionSources.Push(tcs);
-            var result = await tcs.Task;
-
+            bool Instantiate(DeeplyMutableType value) => InstantiateTypeToDeeplyMutable(value, type);
+            var result = await PushInstantiation(Instantiate);
+            AddToTrackers(result.Value);
             return result;
         }
 
         public T? AddToScene<T>() where T : MonoBehaviour
         {
-            bool Instantiate(DeeplyMutableType value)
-            {
-                try
-                {
-                    _typePools.TryAdd(typeof(T), new ObjectPool(() => new DeeplyMutable<T>((T?)Activator.CreateInstance(typeof(T)))));
-                    value.Value = _typePools[typeof(T)].Get.Value;
-                }
-                catch (Exception ex)
-                {
-                    Log.Error("Scene {name} encountered a problem while instantiating object of type {t}\t:\t{ex}", name, typeof(T), ex.Message);
-                    return false;
-                }
-                return true;
-            }
-
-            _objectGenerators.Enqueue(Instantiate);
-            var tcs = new TaskCompletionSource<DeeplyMutableType>();
-            _instantiationCompletionSources.Push(tcs);
-            var result = tcs.Task;
-
-            result.Wait();
-
-            return result.Result.Value;
+            bool Instantiate(DeeplyMutableType value) => InstantiateTypeToDeeplyMutable(value, typeof(T));
+            var t = PushInstantiation(Instantiate);
+            t.Wait();
+            var result = t.Result.Value;
+            AddToTrackers(result);
+            return result;
         }
 
         public DeeplyMutableType AddToScene(Type type)
         {
-            bool Instantiate(DeeplyMutableType value)
-            {
-                try
-                {
-                    _typePools.TryAdd(type, new ObjectPool(() => new(Activator.CreateInstance(type))));
-                    value.Value = _typePools[type].Get.Value;
-                }
-                catch (Exception ex)
-                {
-                    Log.Error("Scene {name} encountered a problem while instantiating object of type {t}\t:\t{ex}", name, type, ex.Message);
-                    return false;
-                }
-                return true;
-            }
-
-            _objectGenerators.Enqueue(Instantiate);
-            var tcs = new TaskCompletionSource<DeeplyMutableType>();
-            _instantiationCompletionSources.Push(tcs);
-            var result = tcs.Task;
-
-            result.Wait();
-
-            return result.Result;
+            bool Instantiate(DeeplyMutableType value) => InstantiateTypeToDeeplyMutable(value, type);
+            var t = PushInstantiation(Instantiate);
+            t.Wait();
+            var result = t.Result;
+            AddToTrackers(result.Value);
+            return result;
         }
 
         public void RemoveFromScene(MonoBehaviour monoBehaviour)
@@ -227,10 +202,9 @@ namespace ScapeCore.Core.SceneManagement
                     _instantiateInvocations.Dispose();
                     _monoBehaviours.Clear();
                     _gameObjects.Clear();
-                    _objectGenerators.Clear();
-                    foreach (var iCS in _instantiationCompletionSources)
-                        iCS.SetCanceled();
-                    _instantiationCompletionSources.Clear();
+                    foreach (var iCS in _objectGeneratorCompletionReferences)
+                        iCS.CompletionReference.SetCanceled();
+                    _objectGeneratorCompletionReferences.Clear();
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer

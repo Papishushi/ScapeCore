@@ -118,10 +118,8 @@ namespace ScapeCore.Core.Engine
             }
             var temp = new T();
             behaviours.Add(temp);
-            if (typeof(Component).IsAssignableFrom(temp.GetType()))
-                temp.To<Component>().gameObject = this;
-            if (typeof(MonoBehaviour).IsAssignableFrom(temp.GetType()))
-                temp.To<MonoBehaviour>().gameObject = this;
+            if (typeof(IEntityComponentModel).IsAssignableFrom(temp.GetType()))
+                ((IEntityComponentModel)temp).gameObject = this;
             return temp;
         }
         public T? AddBehaviour<T>(T behaviour) where T : Behaviour
@@ -137,10 +135,8 @@ namespace ScapeCore.Core.Engine
             }
             if (behaviour == null) return null;
             behaviours.Add(behaviour);
-            if (typeof(Component).IsAssignableFrom(behaviour.GetType()))
-                behaviour.To<Component>().gameObject = this;
-            if (typeof(MonoBehaviour).IsAssignableFrom(behaviour.GetType()))
-                behaviour.To<MonoBehaviour>().gameObject = this;
+            if (typeof(IEntityComponentModel).IsAssignableFrom(behaviour.GetType()))
+                ((IEntityComponentModel)behaviour).gameObject = this;
             return behaviour;
         }
 
@@ -161,10 +157,8 @@ namespace ScapeCore.Core.Engine
             {
                 if (behaviour == null) continue;
                 this.behaviours.Add(behaviour);
-                if (typeof(Component).IsAssignableFrom(behaviour.GetType()))
-                    behaviour.To<Component>().gameObject = this;
-                if (typeof(MonoBehaviour).IsAssignableFrom(behaviour.GetType()))
-                    behaviour.To<MonoBehaviour>().gameObject = this;
+                if (typeof(IEntityComponentModel).IsAssignableFrom(behaviour.GetType()))
+                    ((IEntityComponentModel)behaviour).gameObject = this;
                 l.Add(behaviour);
             }
             return l.GetEnumerator();
@@ -184,10 +178,8 @@ namespace ScapeCore.Core.Engine
             T? temp = behaviours.Find(x => x.GetType() == typeof(T))?.To<T>();
             if (temp == null) return null;
             behaviours.Remove(temp);
-            if (typeof(Component).IsAssignableFrom(temp.GetType()))
-                temp.To<Component>().gameObject = null;
-            if (typeof(MonoBehaviour).IsAssignableFrom(temp.GetType()))
-                temp.To<MonoBehaviour>().gameObject = null;
+            if (typeof(IEntityComponentModel).IsAssignableFrom(temp.GetType()))
+                ((IEntityComponentModel)temp).gameObject = null;
             return temp;
         }
 
@@ -204,10 +196,8 @@ namespace ScapeCore.Core.Engine
             }
             if (behaviour == null) return null;
             behaviours.Remove(behaviour);
-            if (typeof(Component).IsAssignableFrom(behaviour.GetType()))
-                behaviour.To<Component>().gameObject = null;
-            if (typeof(MonoBehaviour).IsAssignableFrom(behaviour.GetType()))
-                behaviour.To<MonoBehaviour>().gameObject = null;
+            if (typeof(IEntityComponentModel).IsAssignableFrom(behaviour.GetType()))
+                ((IEntityComponentModel)behaviour).gameObject = null;
             return behaviour;
         }
 
@@ -227,10 +217,8 @@ namespace ScapeCore.Core.Engine
             {
                 if (behaviour == null) continue;
                 behaviours.Remove(behaviour);
-                if (typeof(Component).IsAssignableFrom(behaviour.GetType()))
-                    behaviour.To<Component>().gameObject = null;
-                if (typeof(MonoBehaviour).IsAssignableFrom(behaviour.GetType()))
-                    behaviour.To<MonoBehaviour>().gameObject = null;
+                if (typeof(IEntityComponentModel).IsAssignableFrom(behaviour.GetType()))
+                    ((IEntityComponentModel)behaviour).gameObject = null;
                 l.Add(behaviour);
             }
             return l.GetEnumerator();
@@ -253,10 +241,8 @@ namespace ScapeCore.Core.Engine
                 if (behaviour == null) continue;
                 if (!behaviours.Contains(behaviour)) continue;
                 this.behaviours.Remove(behaviour);
-                if (typeof(Component).IsAssignableFrom(behaviour.GetType()))
-                    behaviour.To<Component>().gameObject = null;
-                if (typeof(MonoBehaviour).IsAssignableFrom(behaviour.GetType()))
-                    behaviour.To<MonoBehaviour>().gameObject = null;
+                if (typeof(IEntityComponentModel).IsAssignableFrom(behaviour.GetType()))
+                    ((IEntityComponentModel)behaviour).gameObject = null;
                 l.Add(behaviour);
             }
             return l.GetEnumerator();
@@ -264,19 +250,7 @@ namespace ScapeCore.Core.Engine
 
         protected override void OnCreate()
         {
-            if (SceneManager.CurrentScene.TryGetTarget(out var scene))
-                scene.GameObjects.Add(this);
-            else
-            {
-                var i = SceneManager.AddScene(new Scene("Scene", 0));
-                if (i == -1)
-                {
-                    Log.Warning("{Ga} wasn't correctly created. There was a problem adding it to current scene or to a new one.", nameof(GameObject));
-                    return;
-                }
-                var currentScene = SceneManager.Get(i);
-                currentScene!.GameObjects.Add(this);
-            }
+
         }
 
         protected override void OnDestroy()

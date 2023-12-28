@@ -56,19 +56,6 @@ namespace ScapeCore.Core.Engine
                 Log.Warning("{Mo} wasn't correctly created. {LLAM} instance is GCed.", nameof(MonoBehaviour), typeof(LLAM).FullName);
                 return;
             }
-            if (SceneManager.CurrentScene.TryGetTarget(out var scene))
-                scene.MonoBehaviours.Add(this);
-            else
-            {
-                var i = SceneManager.AddScene(new("Scene", 0));
-                if (i == -1)
-                {
-                    Log.Warning("{Mo} wasn't correctly created. There was a problem adding it to current scene or creating a new one.", nameof(MonoBehaviour));
-                    return;
-                }
-                var currentScene = SceneManager.Get(i);
-                currentScene!.MonoBehaviours.Add(this);
-            }
             Game.OnStart += StartWrapper;
             Game.OnUpdate += UpdateWrapper;
         }

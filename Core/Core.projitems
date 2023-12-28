@@ -15,7 +15,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Batching\Tools\DeeplyMutableType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batching\Tools\DeeplyMutable.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batching\Events\LoadBatchEventArgs.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Batching\Tools\ObjectPool.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Collections\Pooling\ObjectPool.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batching\Tools\ReflectiveEnumerator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batching\Events\RenderBatchEventArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batching\Resources\ResourceLoadAttribute.cs" />
@@ -35,7 +35,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)Engine\MonoBehaviour.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Engine\Tilemaps\TileBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Engine\Tilemaps\TileRenderer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FPSMetric.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)LLAM.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Physics2D\Collider2D.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Physics2D\RigidBody2D.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SceneManagement\Scene.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SceneManagement\SceneManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\Streamers\GZipStreamer.cs" />
@@ -50,6 +53,7 @@
     <Folder Include="$(MSBuildThisFileDirectory)Batching\Events\" />
     <Folder Include="$(MSBuildThisFileDirectory)Batching\Resources\" />
     <Folder Include="$(MSBuildThisFileDirectory)Collections\Merkle\" />
+    <Folder Include="$(MSBuildThisFileDirectory)Collections\Pooling\" />
     <Folder Include="$(MSBuildThisFileDirectory)Serialization\Streamers\" />
     <Folder Include="$(MSBuildThisFileDirectory)Serialization\Tools\" />
   </ItemGroup>

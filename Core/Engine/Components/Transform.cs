@@ -25,6 +25,9 @@ namespace ScapeCore.Core.Engine.Components
         public Vector2 _rotation = Vector2.Zero;
         public Vector2 _scale = Vector2.One;
 
+        public Vector2 LocalPosition { get => _position; set => _position = value; }
+        public Vector2 LocalRotation { get => _rotation; set => _rotation = value; }
+        public Vector2 LocalScale { get => _scale; set => _scale = value; }
         public Vector2 Position { get => (gameObject?.parent?.transform?.Position ?? Vector2.Zero) + _position; set => _position = value; }
         public Vector2 Rotation { get => (gameObject?.parent?.transform?.Rotation ?? Vector2.Zero) + _rotation; set => _rotation = value; }
         public Vector2 Scale { get => (gameObject?.parent?.transform?.Scale ?? Vector2.One) * _scale; set => _scale = value; }
