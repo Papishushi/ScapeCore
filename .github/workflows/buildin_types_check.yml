@@ -24,5 +24,6 @@ jobs:
         git config --global user.email "danielmolinero111@cyberdude.com"
         git config --global user.name "Papishushi"
         git add .
+        git push
         git commit -m "Update BuildinTypes.xml via GitHub Actions"
         git pull
