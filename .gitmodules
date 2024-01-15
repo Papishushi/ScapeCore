@@ -1,6 +1,4 @@
 [submodule "ScapeCore.Core.Serialization"]
 	path = ScapeCore.Core.Serialization
 	url = https://github.com/papishushi/ScapeCore.Core.Serialization
-[submodule "ScapeCore.Core.Tools"]
-	path = ScapeCore.Core.Tools
-	url = https://github.com/papishushi/ScapeCore.Core.Tools
+
