@@ -12,11 +12,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Batching\Resources\ResourceDependencyTree.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batching\Resources\ResourceInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batching\Resources\ResourceWrapper.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Batching\Tools\DeeplyMutableType.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Batching\Tools\DeeplyMutable.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batching\Events\LoadBatchEventArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Collections\Pooling\ObjectPool.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Batching\Tools\ReflectiveEnumerator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batching\Events\RenderBatchEventArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batching\Resources\ResourceLoadAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batching\Resources\ResourceManager.cs" />
@@ -41,21 +38,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)Physics2D\RigidBody2D.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SceneManagement\Scene.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SceneManagement\SceneManager.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Streamers\GZipStreamer.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Serialization\RuntimeModelFactory.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Streamers\ScapeCoreDeserializer.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Streamers\ScapeCoreSeralizationStreamer.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Streamers\ScapeCoreSerializer.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Serialization\SerializationManager.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Tools\StreamExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)Batching\Events\" />
     <Folder Include="$(MSBuildThisFileDirectory)Batching\Resources\" />
     <Folder Include="$(MSBuildThisFileDirectory)Collections\Merkle\" />
     <Folder Include="$(MSBuildThisFileDirectory)Collections\Pooling\" />
-    <Folder Include="$(MSBuildThisFileDirectory)Serialization\Streamers\" />
-    <Folder Include="$(MSBuildThisFileDirectory)Serialization\Tools\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="$(MSBuildThisFileDirectory)BuildinTypes.xml">
