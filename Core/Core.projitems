@@ -38,6 +38,16 @@
     <Compile Include="$(MSBuildThisFileDirectory)Physics2D\RigidBody2D.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SceneManagement\Scene.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SceneManagement\SceneManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Serialization\RuntimeModelFactory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Serialization\SerializationManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Serialization\Streamers\GZipStreamer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Serialization\Streamers\ScapeCoreDeserializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Serialization\Streamers\ScapeCoreSeralizationStreamer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Serialization\Streamers\ScapeCoreSerializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Serialization\Tools\StreamExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tools\Tools\DeeplyMutable.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tools\Tools\DeeplyMutableType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tools\Tools\ReflectiveEnumerator.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)Batching\Events\" />
@@ -49,5 +59,23 @@
     <Content Include="$(MSBuildThisFileDirectory)BuildinTypes.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="$(MSBuildThisFileDirectory)Serialization\LICENSE.txt" />
+    <Content Include="$(MSBuildThisFileDirectory)Tools\LICENSE.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)Serialization\.gitattributes" />
+    <None Include="$(MSBuildThisFileDirectory)Serialization\.gitignore" />
+    <None Include="$(MSBuildThisFileDirectory)Serialization\CODESTYLE.md" />
+    <None Include="$(MSBuildThisFileDirectory)Serialization\README.md" />
+    <None Include="$(MSBuildThisFileDirectory)Serialization\ScapeCore.Core.Serialization.csproj" />
+    <None Include="$(MSBuildThisFileDirectory)Serialization\ScapeCore.Core.Serialization.sln" />
+    <None Include="$(MSBuildThisFileDirectory)Serialization\SECURITY.md" />
+    <None Include="$(MSBuildThisFileDirectory)Tools\.gitattributes" />
+    <None Include="$(MSBuildThisFileDirectory)Tools\.gitignore" />
+    <None Include="$(MSBuildThisFileDirectory)Tools\CODESTYLE.md" />
+    <None Include="$(MSBuildThisFileDirectory)Tools\README.md" />
+    <None Include="$(MSBuildThisFileDirectory)Tools\ScapeCore.Core.Tools.csproj" />
+    <None Include="$(MSBuildThisFileDirectory)Tools\ScapeCore.Core.Tools.sln" />
+    <None Include="$(MSBuildThisFileDirectory)Tools\SECURITY.md" />
   </ItemGroup>
 </Project>
