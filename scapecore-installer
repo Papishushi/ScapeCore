@@ -1,0 +1,97 @@
+#!/bin/bash
+
+# Function to print a progress bar
+print_progress() {
+    local progress=$1
+    local length=50
+    local bar_length=$((progress * length / 100))
+    local spaces_length=$((length - bar_length))
+
+    printf "\r["
+    printf "%${bar_length}s" "" | tr ' ' '#'
+    printf "%${spaces_length}s" ""
+    printf "] %d%%\n" "$progress"
+}
+
+# Clone the main repository
+if [ ! -d "ScapeCore" ]; then
+    git clone "https://github.com/Papishushi/ScapeCore"
+fi
+
+# Check if the clone was successful
+if [ $? -ne 0 ]; then
+    echo "Error: Unable to clone the repository."
+    exit 1
+fi
+
+# Move into the cloned directory
+cd ScapeCore/Core
+
+# Update and initialize submodules with progress indicator
+total_submodules=$#
+current_submodule=0
+
+# Update and initialize submodules
+while [ "$#" -gt 0 ]; do
+    current_submodule=$((total_submodules - $# + 1))
+    export submodule_path="$1"
+    # Print progress bar
+    progress=$((current_submodule * 100 / total_submodules))
+    # Check if module path does not exist or is empty
+    if [ ! -d "$submodule_path" ] || [ -z "$(ls -A "$submodule_path")" ]; then
+        print_progress "$progress"
+        git submodule update --init "$submodule_path"
+        # Update the .projitems file with the necessary dependencies from the submodule
+        export proj_items_path="./Core.projitems"
+        python3.12 - <<END
+import os
+import xml.etree.ElementTree as ET
+
+submodule_path = os.getenv('submodule_path')
+proj_items_path = os.getenv('proj_items_path')
+
+if os.path.isdir(submodule_path):
+    submodule_files = [os.path.join(dirpath, filename)
+                       for dirpath, _, filenames in os.walk(submodule_path)
+                       for filename in filenames
+                       if filename.endswith(".cs")]
+    if os.path.exists(proj_items_path):
+        ET.register_namespace('xmlns', 'http://schemas.microsoft.com/developer/msbuild/2003')
+        namespace_map = {"xmlns": "http://schemas.microsoft.com/developer/msbuild/2003"}
+
+        tree = ET.parse(proj_items_path)
+        root = tree.getroot()
+
+        files_tag = root.find(".//xmlns:Compilation", namespaces=namespace_map)
+
+        # Check if the tag is found
+        if files_tag is not None:
+            for file in submodule_files:
+                file_element = ET.Element("Compile", Include="\$(MSBuildThisFileDirectory)" + file)
+                files_tag.append(file_element)
+
+            # Remove the ns0: prefix from the root element and its descendants
+            for elem in root.iter():
+                if '}' in elem.tag:
+                    elem.tag = elem.tag.split('}', 1)[1]
+
+            ET.indent(tree, space="  ", level=0)
+            tree.write(proj_items_path, encoding='utf-8', xml_declaration=True)
+
+            print(f"\nSubmodule files added to {proj_items_path}")
+        else:
+            print("Error: <Compilation> tag not found in the .projitems file structure.")
+    else:
+        print(f"Error: {proj_items_path} not found.")
+else:
+    print(f"Submodule not found. No changes made to {proj_items_path}")
+END
+        # Add xlmns to the Project tag
+        sed -i 's|<Project>|<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">|g' "$proj_items_path"
+    else
+        echo "Warning: The submodule directory '$submodule_path' already exists."
+        echo "Skipping submodule initialization for '$submodule_path'."
+    fi
+    shift
+done
+find . -type d -empty -delete
