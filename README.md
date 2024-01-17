@@ -1,4 +1,7 @@
 # ScapeCore Game Engine
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/83277dbbd9a8487ab0caa3c3b0d9d1bb)](https://app.codacy.com/gh/Papishushi/ScapeCore?utm_source=github.com&utm_medium=referral&utm_content=Papishushi/ScapeCore&utm_campaign=Badge_Grade)
+
   
 ScapeCore is your go-to free and open-source game engine riding on the MonoGame wave. It's like the Swiss Army knife for game devs – lightweight, modular, and just chill.
 In the future I'm planning on building a GUI Editor also, but for now on I'm mainly focusing on the Core, Backend and API. 
