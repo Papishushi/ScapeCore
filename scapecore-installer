@@ -63,7 +63,7 @@ if os.path.isdir(submodule_path):
         tree = ET.parse(proj_items_path)
         root = tree.getroot()
 
-        files_tag = root.find(".//xmlns:Compilation", namespaces=namespace_map)
+        files_tag = root.find(".//xmlns:ItemGroup", namespaces=namespace_map)
 
         # Check if the tag is found
         if files_tag is not None:
