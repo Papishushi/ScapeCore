@@ -4,3 +4,18 @@
 [submodule "Core/Serialization"]
 	path = Core/Serialization
 	url = https://github.com/papishushi/ScapeCore.Core.Serialization
+[submodule "Core/Batching"]
+	path = Core/Batching
+	url = https://github.com/Papishushi/ScapeCore.Core.Batching
+[submodule "Core/Targets"]
+	path = Core/Targets
+	url = https://github.com/Papishushi/ScapeCore.Core.Targets
+[submodule "Core/Engine"]
+	path = Core/Engine
+	url = https://github.com/Papishushi/ScapeCore.Core.Engine
+[submodule "Core/Collections"]
+	path = Core/Collections
+	url = https://github.com/Papishushi/ScapeCore.Core.Collections
+[submodule "Core/SceneManagement"]
+	path = Core/SceneManagement
+	url = https://github.com/Papishushi/ScapeCore.Core.SceneManagement
