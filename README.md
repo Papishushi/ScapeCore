@@ -51,7 +51,7 @@ If that's not the case use these commands, and press '**_Y_**' when prompted:
 
 ---
 
-> **Also make sure that you have dotnet installed by running the command** > **`dotnet --version`. If you dont have .NET SDK installed on your system** > **you may want to take a look at [dotnet-install.sh](https://learn.microsoft.com/en-us/dotnet/core/install/linux-scripted-manual#scripted-install).**
+> **Also make sure that you have dotnet installed by running the command** **`dotnet --version`. If you dont have .NET SDK installed on your system** **you may want to take a look at [dotnet-install.sh](https://learn.microsoft.com/en-us/dotnet/core/install/linux-scripted-manual#scripted-install).**
 
 ---
 
