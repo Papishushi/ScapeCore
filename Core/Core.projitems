@@ -9,41 +9,8 @@
     <Import_RootNamespace>Core</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)Batching\Resources\ResourceDependencyTree.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Batching\Resources\ResourceInfo.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Batching\Resources\ResourceWrapper.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Batching\Events\LoadBatchEventArgs.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Collections\Pooling\ObjectPool.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Batching\Events\RenderBatchEventArgs.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Batching\Resources\ResourceLoadAttribute.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Batching\Resources\ResourceManager.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Batching\Events\StartBatchEventArgs.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Batching\Events\UpdateBatchEventArgs.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Collections\Merkle\MerkleNode.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Collections\Merkle\MerkleTree.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Engine\Behaviour.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Engine\Component.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Engine\Components\RectTransform.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Engine\Components\Renderer.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Engine\Components\SpriteRenderer.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Engine\Components\Transform.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Engine\GameObject.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Engine\IEntityComponentModel.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Engine\MonoBehaviour.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Engine\Tilemaps\TileBase.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Engine\Tilemaps\TileRenderer.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)FPSMetric.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)LLAM.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Physics2D\Collider2D.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Physics2D\RigidBody2D.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SceneManagement\Scene.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SceneManagement\SceneManager.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="$(MSBuildThisFileDirectory)Batching\Events\" />
-    <Folder Include="$(MSBuildThisFileDirectory)Batching\Resources\" />
-    <Folder Include="$(MSBuildThisFileDirectory)Collections\Merkle\" />
-    <Folder Include="$(MSBuildThisFileDirectory)Collections\Pooling\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="$(MSBuildThisFileDirectory)BuildinTypes.xml">
