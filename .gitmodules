@@ -19,3 +19,6 @@
 [submodule "Core/SceneManagement"]
 	path = Core/SceneManagement
 	url = https://github.com/Papishushi/ScapeCore.Core.SceneManagement
+[submodule "Core/Physics2D"]
+	path = Core/Physics2D
+	url = https://github.com/Papishushi/ScapeCore.Core.Physics2D
