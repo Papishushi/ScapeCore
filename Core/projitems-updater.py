@@ -1,9 +1,4 @@
 import os
-# Importing the necessary function from defusedxml
-from defusedxml import defuse_stdlib
-
-# Calling defuse_stdlib to patch the standard library
-defuse_stdlib()
 
 import xml.etree.ElementTree as eT
 
