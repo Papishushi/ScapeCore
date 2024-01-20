@@ -1,13 +1,15 @@
 <BuildinTypes Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04">
+	<Type>LoadBatchEventArgs</Type>
+	<Type>RenderBatchEventArgs</Type>
+	<Type>StartBatchEventArgs</Type>
+	<Type>UpdateBatchEventArgs</Type>
 	<Type>ResourceDependencyTree</Type>
 	<Type>ResourceInfo</Type>
 	<Type>ResourceLoadAttribute</Type>
 	<Type>ResourceWrapper</Type>
-	<Type>DeeplyMutable</Type>
-	<Type>DeeplyMutableType</Type>
-	<Type>ObjectPool</Type>
 	<Type>MerkleNode</Type>
 	<Type>MerkleTree</Type>
+	<Type>ObjectPool</Type>
 	<Type>Behaviour</Type>
 	<Type>Component</Type>
 	<Type>RectTransform</Type>
@@ -16,17 +18,24 @@
 	<Type>Transform</Type>
 	<Type>GameObject</Type>
 	<Type>MonoBehaviour</Type>
-	<Type>TileBase</Type>
-	<Type>TileRenderer</Type>
-	<Type>LLAM</Type>
+	<Type>Collider2D</Type>
+	<Type>Impact2D</Type>
+	<Type>RigidBody2D</Type>
 	<Type>Scene</Type>
 	<Type>RuntimeModelFactory</Type>
 	<Type>ChangeModelError</Type>
 	<Type>ChangeModelOutput</Type>
+	<Type>GZipStreamer</Type>
+	<Type>byte</Type>
+	<Type>byte</Type>
 	<Type>ScapeCoreDeserializer</Type>
 	<Type>DeserializationOutput</Type>
 	<Type>ScapeCoreSeralizationStreamer</Type>
 	<Type>SerializationError</Type>
 	<Type>ScapeCoreSerializer</Type>
 	<Type>SerializationOutput</Type>
+	<Type>FPSMetric</Type>
+	<Type>LLAM</Type>
+	<Type>DeeplyMutable</Type>
+	<Type>DeeplyMutableType</Type>
 </BuildinTypes>
