@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 {
   echo '<BuildinTypes Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04">';
