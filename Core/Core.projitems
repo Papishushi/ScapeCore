@@ -9,8 +9,6 @@
     <Import_RootNamespace>Core</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)Physics2D\Collider2D.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Physics2D\RigidBody2D.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="$(MSBuildThisFileDirectory)BuildinTypes.xml">
