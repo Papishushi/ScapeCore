@@ -22,3 +22,6 @@
 [submodule "Core/Physics2D"]
 	path = Core/Physics2D
 	url = https://github.com/Papishushi/ScapeCore.Core.Physics2D
+[submodule "Templates.CSharp"]
+	path = Templates.CSharp
+	url = https://github.com/Papishushi/ScapeCore.Templates.CSharp.git
