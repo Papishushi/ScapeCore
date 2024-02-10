@@ -1,5 +1,4 @@
-import os
-
+﻿import os
 import xml.etree.ElementTree as eT
 
 submodule_path = os.getenv('submodule_path')

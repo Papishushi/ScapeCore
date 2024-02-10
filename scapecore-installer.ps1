@@ -1,17 +1,10 @@
-# Function to print a progress bar
+﻿# Function to print a progress bar
 function Print-Progress {
     param(
         [int]$progress
     )
 
-    $length = 50
-    $barLength = [math]::Round($progress * $length / 100)
-    $spacesLength = $length - $barLength
-
-    Write-Host -NoNewline "`r["
-    Write-Host -NoNewline ("#" * $barLength)
-    Write-Host -NoNewline (" " * $spacesLength)
-    Write-Host ("] {0}%" -f $progress)
+    Write-Progress -Activity "Installing ScapeCore" -Status "$progress% Complete:" -PercentComplete $progress
 }
 
 # Clone the main repository
@@ -61,7 +54,6 @@ foreach ($submodulePath in $args) {
         Write-Host "Skipping submodule initialization for '$submodulePath'."
     }
 }
-
 
 Get-ChildItem -Recurse | Where-Object { $_.PSIsContainer -and @(Get-ChildItem $_.FullName) -eq $null } | Remove-Item
 dotnet restore "./Core.csproj"
