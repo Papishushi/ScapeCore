@@ -22,7 +22,7 @@ if os.path.isdir(submodule_path):
         # Check if the tag is found
         if files_tag is not None:
             for file in submodule_files:
-                file_element = eT.Element("Compile", Include="\\$(MSBuildThisFileDirectory)" + file)
+                file_element = eT.Element("Compile", Include="$(MSBuildThisFileDirectory)" + file)
                 files_tag.append(file_element)
 
             # Remove the ns0: prefix from the root element and its descendants
