@@ -14,7 +14,7 @@ if (-not (Test-Path "ScapeCore")) {
 
 # Check if the clone was successful
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "Error: Unable to clone the repository."
+    Write-Error "Error: Unable to clone the repository."
     exit 1
 }
 
@@ -47,8 +47,8 @@ foreach ($submodulePath in $args) {
         } | Set-Content $env:proj_items_path
     }
     else {
-        Write-Host "Warning: The submodule directory '$submodulePath' already exists."
-        Write-Host "Skipping submodule initialization for '$submodulePath'."
+        Write-Information "Warning: The submodule directory '$submodulePath' already exists."
+        Write-Information "Skipping submodule initialization for '$submodulePath'."
     }
 }
 
