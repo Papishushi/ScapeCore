@@ -1,5 +1,5 @@
 ﻿# Function to print a progress bar
-function Print-Progress {
+function Show-Progress {
     param(
         [int]$progress
     )
@@ -31,7 +31,7 @@ foreach ($submodulePath in $args) {
     $progress = [math]::Round($currentSubmodule * 100 / $totalSubmodules)
 
     # Print progress bar
-    Print-Progress $progress
+    Show-Progress $progress
 
     # Check if module path does not exist or is empty
     if (-not (Test-Path $submodulePath -PathType Container) -or -not (Get-ChildItem $submodulePath)) {
