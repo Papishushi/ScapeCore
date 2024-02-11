@@ -41,9 +41,6 @@ foreach ($submodulePath in $args) {
 		$env:proj_items_path = "./Core.projitems"
         dotnet restore $env:proj_items_path
 
-        # Update the .projitems file with the necessary dependencies from the submodule
-        python projitems-updater.py
-
         # Add xmlns to the Project tag
         (Get-Content $env:proj_items_path) | ForEach-Object {
             $_ -replace '<Project>', '<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">'

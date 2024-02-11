@@ -44,7 +44,6 @@ while [ "$#" -gt 0 ]; do
 		dotnet restore "$submodule_path"/"ScapeCore.Core.$submodule_path.csproj"
         # Update the .projitems file with the necessary dependencies from the submodule
         export proj_items_path="./Core.projitems"
-        python3.12 projitems-updater.py
         # Add xlmns to the Project tag
         sed -i 's|<Project>|<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">|g' "$proj_items_path"
     else
