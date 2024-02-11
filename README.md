@@ -16,38 +16,60 @@ In the future I'm planning on building a GUI Editor also, but for now on I'm mai
 ## Quick Start
 
 ## 1 Installation Methods
-
-#### 1. Using the installer
+#### 1. Using dotnet templates (Recommended for new users)
 
 ---
 
-> This installer uses [bash](https://www.gnu.org/software/bash/), so it's a prerequisite having a compatible terminal available in your system, if you are working on Windows you may have some problems with this step. For that reason I recommend you to use [WSL2](https://learn.microsoft.com/es-es/windows/wsl/about) for a seamless integration with the OS. You can use the [default WSL kernel provided by Microsoft](https://learn.microsoft.com/es-es/windows/wsl/install) or [compile your own custom kernel](https://github.com/microsoft/WSL2-Linux-Kernel).
+> **Make sure that you have dotnet installed by running the command** **`dotnet --version`. If you dont have .NET SDK installed on your system** **you may want to take a look at [dotnet-install.sh](https://learn.microsoft.com/en-us/dotnet/core/install/linux-scripted-manual#scripted-install).**
+
+---
+
+On your preferred terminal write down:
+
+      dotnet new install ScapeCore.Templates.CSharp --force
+
+Congratulations! You just installed ScapeCore template package!
+Now you can use it as simply as this:
+
+      dotnet new scdesktopgl "your proyect name"
+
+Once your project is created you can open it on VisualStudio by double clicking on the .csproj file whitin the project.
+
+If you want the full developing experience just use the developer template:
+
+      dotnet new devscdesktopgl "your proyect name"
+
+This template will inform you about post template creation actions. You must allow it by pressing 'y' and enter.
+Once your project is created you can open it on VisualStudio by double clicking on the .sln file whitin the project.
+#### 2. Using the installer
+
+---
+
+> This installer has two versions, one uses [bash](https://www.gnu.org/software/bash/) and the other [powershell](https://github.com/PowerShell/PowerShell) so it's a prerequisite having a compatible terminal available in your system, if you are working on Windows and want to use bash you may have some problems with this step. For that reason I recommend you to use [WSL2](https://learn.microsoft.com/es-es/windows/wsl/about) for a seamless integration with the OS. You can use the [default WSL kernel provided by Microsoft](https://learn.microsoft.com/es-es/windows/wsl/install) or [compile your own custom kernel](https://github.com/microsoft/WSL2-Linux-Kernel). If you are gonna be using powershell you should be good to go on Windows devices.
 
 ---
 
 The first step is to download the installer. For this purpose we can use one of the following methods.
 
-- **Download the installer using wget**:
-  `wget https://raw.githubusercontent.com/Papishushi/ScapeCore/master/scapecore-installer`
+Powershell Users:
+- **Download the installer using the CLI**:
+  
+        New-Item scapecore-installer.ps1  -ItemType File -Value (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/Papishushi/ScapeCore/master/scapecore-installer.ps1')
+  
 - **Download the installer manually**:
-  1.  Navigate to [scapecore-installer](https://github.com/Papishushi/ScapeCore/blob/master/scapecore-installer).
+  1.  Navigate to [scapecore-installer.ps1](https://github.com/Papishushi/ScapeCore/blob/master/scapecore-installer.ps1).
+  2.  Inside the file display, click on **Download Raw File**.
+     
+Bash users:
+- **Download the installer using wget**:
+  
+        wget https://raw.githubusercontent.com/Papishushi/ScapeCore/master/scapecore-installer.sh -O scapecore-installer.sh
+  
+- **Download the installer manually**:
+  1.  Navigate to [scapecore-installer.sh](https://github.com/Papishushi/ScapeCore/blob/master/scapecore-installer.sh).
   2.  Inside the file display, click on **Download Raw File**.
 
 Once you have the installer on your PC, you must move it to the directory where you want to locate ScapeCore installation. You can do this by using a command like `mv` or by moving the file manually using your file system.
-
-Once you have found a directory for the installation, you can run your terminal and make sure to type the following commands:
-
-    sudo apt update
-    sudo apt upgrade
-
-Make sure that you have at least **_python3.12_** by running the following command:
-
-    python --version
-
-If that's not the case use these commands, and press '**_Y_**' when prompted:
-
-    sudo add-apt-repository ppa:deadsnakes/ppa
-    sudo apt install python3.12
 
 ---
 
@@ -77,20 +99,14 @@ The first step is to download the source code. For this purpose we can use one o
       git clone https://github.com/Papishushi/ScapeCore.git
 
 - **Download the source code manually**:
-  1.  Navigate to [scapecore-installer](https://github.com/Papishushi/ScapeCore/blob/master/scapecore-installer).
-  2.  Inside the file display, click on **Download Raw File**.
+  1.  Navigate to [scapecore](https://github.com/Papishushi/ScapeCore/blob/master/).
+  2.  Inside the code button, click on **Download Zip**.
 
 Once you have a copy of the source code you can initialize the submodules by doing the following command:
 
     git submodule update --init "submodule"
 
 Where "submodule" is the name of the submodule you want to install. If you want to install all submodules just do not specify a submodule name.
-
----
-
-> If you have installed submodules you must manually modify the file _./Core/Core.projitems_ and append a new element under the _\<Compilation>_ tag for each .cs file on the submodule, using the following style: _\<Compile Include="$(MSBuildThisFileDirectory)Serialization/Serialization/Tools/StreamExtensions.cs" />_
-
----
 
 To end the installation process you must ensure that all dependencies are matched, you can use one of this methods to match dependencies:
 
