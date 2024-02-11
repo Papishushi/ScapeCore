@@ -90,7 +90,7 @@ For example, the following instruction would install basic ScapeCore if it is no
      ./scapecore-installer Tools Serialization
 
 
-#### 2. Using the source code
+#### 3. Using the source code
 
 The first step is to download the source code. For this purpose we can use one of the following methods.
 
