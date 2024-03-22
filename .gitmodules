@@ -28,3 +28,6 @@
 [submodule "Traceability"]
 	path = Traceability
 	url = https://github.com/papishushi/ScapeCore.Traceability
+[submodule "Core/Debug"]
+	path = Core/Debug
+	url = https://github.com/Papishushi/ScapeCore.Core.Debug,git
