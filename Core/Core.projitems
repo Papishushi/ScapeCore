@@ -12,6 +12,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)**/*.cs" />
     <Compile Remove="$(MSBuildThisFileDirectory)obj/**/*.cs" />
     <Compile Remove="$(MSBuildThisFileDirectory)bin/**/*.cs" />
+    <Compile Remove="$(MSBuildThisFileDirectory)**/obj/**/*.cs" />
+    <Compile Remove="$(MSBuildThisFileDirectory)**/bin/**/*.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="$(MSBuildThisFileDirectory)BuildinTypes.xml">
