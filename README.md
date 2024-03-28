@@ -11,6 +11,8 @@ In the future, I'm planning on building a GUI Editor also, but for now on, I'm m
 - **Serialize Like a Pro:** Saving and loading game states got you stressed? Chill out with our Serialization Manager. It supports Protocol Buffers and even throws in optional GZip compression – slick and fast.
 - **Resource Wizardry:** The Resource Manager is like a magician, juggling resources in a thread-safe show. Load, distribute, and track dependencies effortlessly. Keep your game running smooth and snappy.
 - **Scene Management:** Easily add MonoBehaviours or GameObjects to a scene environment, and efficiently organize and transition between game scenes for a seamless player experience.
+- **Debugger:** Fully customizable and expandible debugger and command system.
+- **Inject your dependencies:** Expand and customize ScapeCore design with your own services and managers, you can load and unload dependencies to ScapeCore at runtime.
 - **⚠️2D Physics Engine⚠️:** This one is **WIP**, any contributions would be much appreciated.
 
 ## Quick Start
